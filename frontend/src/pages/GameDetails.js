@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Modal from '../components/Modal';
 import VideoUploader from '../components/VideoUploader';
+import api from '../utils/api';
+import { markMatchViewed } from '../utils/viewedMatches';
 import './GameDetails.css';
 
 const GameDetails = () => {
@@ -9,13 +11,32 @@ const GameDetails = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [currentClip, setCurrentClip] = useState(0);
   const [selectedTag, setSelectedTag] = useState(null);
-
-  const game = {
+  const [game, setGame] = useState({
     id: gameId,
-    teamName: 'Team 1',
-    opponent: 'Team 2',
-    date: '2026-01-20'
-  };
+    teamName: 'Team',
+    opponent: 'Opponent',
+    date: new Date().toISOString(),
+  });
+
+  useEffect(() => {
+    const loadMatch = async () => {
+      try {
+        const res = await api.get(`/matches/${gameId}`);
+        const match = res.data;
+        markMatchViewed(match._id);
+        setGame({
+          id: match._id,
+          teamName: match.team?.name || 'Team',
+          opponent: match.opponent,
+          date: match.date,
+        });
+      } catch (err) {
+        console.error('Load match details error:', err);
+      }
+    };
+
+    loadMatch();
+  }, [gameId]);
 
   const clips = [
     { id: '1', thumbnail: null, duration: '2:34' },

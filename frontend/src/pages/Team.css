@@ -11,6 +11,12 @@
     gap: 10px;
 }
 
+.team-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .team-name {
     flex: 1;
     font-size: clamp(24px, 6vw, 32px);
@@ -19,12 +25,15 @@
 }
 
 .invite-btn {
+    width: 45px;
+    height: 45px;
     background: var(--color-accent-secondary);
     border: none;
     color: var(--color-text);
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
     padding: 5px;
+    padding-bottom: 0;
     border-radius: 10px;
     transition: background-color 0.2s, transform 0.2s;
     filter: drop-shadow(0px 0px 3px var(--color-shadow-white));
@@ -36,6 +45,32 @@
 
 .invite-btn:active {
     transform: scale(0.95);
+}
+
+.delete-team-btn {
+    height: 35px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 4px;
+    padding: 10px 10px;
+    background: #c0392b;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.delete-team-btn:hover:not(:disabled) {
+    background: #a93226;
+}
+
+.delete-team-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.delete-team-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .games-list {
@@ -155,6 +190,39 @@
     flex-direction: column;
 }
 
+.team-error-text {
+    color: red;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.team-loading-text {
+    color: var(--color-text-muted);
+    margin: 5px 0 10px;
+}
+
+.team-success-text {
+    color: #2a9d4b;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.team-qr-image {
+    width: 180px;
+    height: 180px;
+    margin: 8px auto;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: #fff;
+}
+
+.team-link-text {
+    color: var(--color-text-muted);
+    font-size: 12px;
+    margin: 8px 0;
+    word-break: break-all;
+}
+
 @media (min-width: 500px) {
     .team-page {
         max-width: 600px;
@@ -164,7 +232,6 @@
 
     .invite-btn {
         font-size: 18px;
-        padding: 10px 20px;
     }
 
     .game-card {

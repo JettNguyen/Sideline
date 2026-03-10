@@ -61,6 +61,10 @@ const Login = () => {
     setError('');
   };
 
+  const handleForgotPassword = () => {
+    setError('Password reset is not available yet.');
+  };
+
   return (
     <div className="login-container">
       <div className="login-header">
@@ -124,6 +128,16 @@ const Login = () => {
           <button type="submit" className="login-button">
             {isRegistering ? 'Create Account' : 'Log In'}
           </button>
+
+          {!isRegistering && (
+            <button
+              type="button"
+              className="forgot-password-button"
+              onClick={handleForgotPassword}
+            >
+              Forgot your password?
+            </button>
+          )}
         </form>
         
         <button 
@@ -131,7 +145,7 @@ const Login = () => {
           className="create-account-button"
           onClick={toggleMode}
         >
-          {isRegistering ? 'Already have an account? Log In' : 'Create an Account'}
+          {isRegistering ? 'Already have an account?\nLog In' : 'Create an Account'}
         </button>
       </div>
     </div>
