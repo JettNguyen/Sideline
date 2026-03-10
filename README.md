@@ -1,8 +1,16 @@
 # Sideline
 
+<p align="center">
+	<img src="frontend/src/logo.svg" alt="Sideline logo" width="140" />
+</p>
+
 Youth soccer club video management web application
 
-## Quick start (backend + frontend)
+## User quick start
+
+[Open Sideline](https://jettnguyen.github.io/Sideline/)
+
+## Developer quick start (backend + frontend)
 
 ### 1. Backend setup
 

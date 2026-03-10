@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/Sideline/static/css/main.7127ba5a.css",
+    "main.js": "/Sideline/static/js/main.1537d407.js",
+    "static/media/logo.svg": "/Sideline/static/media/logo.c77d8293a8808e576409d7e47679f143.svg",
+    "index.html": "/Sideline/index.html",
+    "main.7127ba5a.css.map": "/Sideline/static/css/main.7127ba5a.css.map",
+    "main.1537d407.js.map": "/Sideline/static/js/main.1537d407.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.7127ba5a.css",
+    "static/js/main.1537d407.js"
+  ]
+}
