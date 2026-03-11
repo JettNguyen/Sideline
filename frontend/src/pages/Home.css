@@ -3,10 +3,139 @@
     padding: 15px;
 }
 
+.dashboard-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.dashboard-head h1 {
+    margin: 0 0 10px 0;
+}
+
+.dashboard-add-btn {
+    width: 45px;
+    height: 45px;
+    border: none;
+    font-size: 25px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background: var(--color-accent-secondary);
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.2s;
+    filter: drop-shadow(0 0 5px var(--color-shadow-white));
+}
+
+.dashboard-add-btn:hover {
+    background: var(--color-accent-secondary-strong);
+}
+
+.dashboard-add-btn:active {
+    transform: scale(0.95);
+}
+
 .teams-list {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.team-create-card {
+    background: var(--color-surface-2);
+    border-radius: 15px;
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    filter: drop-shadow(3px 3px 5px var(--color-shadow-white));
+}
+
+.team-create-input {
+    flex: 1;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface-3);
+    color: var(--color-text);
+    padding: 8px 10px;
+    outline: none;
+}
+
+.team-create-input:focus {
+    border-color: var(--color-accent-strong);
+}
+
+.team-create-btn {
+    border: none;
+    border-radius: 10px;
+    background: var(--color-accent);
+    color: var(--color-text);
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.team-create-btn:hover {
+    background: var(--color-accent-strong);
+}
+
+.team-create-btn:active {
+    transform: scale(0.97);
+}
+
+.home-error-text {
+    color: red;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.home-success-text {
+    color: #2a9d4b;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.invite-notification-card {
+    background: var(--color-surface-2);
+    border-radius: 15px;
+    padding: 12px;
+    margin-bottom: 15px;
+    filter: drop-shadow(3px 3px 5px var(--color-shadow-white));
+}
+
+.invite-notification-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.invite-notification-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-top: 1px solid var(--color-border);
+}
+
+.invite-notification-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.invite-decline-btn {
+    background: var(--color-surface-3);
+}
+
+.team-action-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .team-card {
@@ -28,6 +157,14 @@
     transition: background-color 0.2s;
 }
 
+.team-card-header-title,
+.feed-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
 .team-card-header:hover {
     background: var(--color-accent-strong);
 }
@@ -43,6 +180,22 @@
     color: var(--color-text);
     font-size: 14px;
     filter: drop-shadow(0 0 5px var(--color-shadow-strong));
+}
+
+.notification-badge {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--color-accent-secondary);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
 }
 
 .recent-games {
@@ -81,9 +234,17 @@
 
 .no-games {
     text-align: center;
-    color: var(--color-divider);
+    color: var(--color-text-muted);
     font-size: 14px;
     padding: 15px;
+    margin: 0;
+}
+
+.no-teams {
+    text-align: center;
+    color: var(--color-text);
+    font-size: 14px;
+    padding: 10px;
     margin: 0;
 }
 
@@ -134,7 +295,8 @@
 .feed-header h2 {
     margin: 0;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 500;
+    letter-spacing: 1px;
     filter: none;
 }
 

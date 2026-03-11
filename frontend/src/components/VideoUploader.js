@@ -6,7 +6,9 @@ import "@uppy/core/css/style.min.css";
 import "@uppy/dashboard/css/style.min.css";
 import "./VideoUploader.css";
 
-export default function VideoUploader() {
+const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:5001/api").replace(/\/$/, "");
+
+export default function VideoUploader({ onUploadSuccess, matchId }) {
   const containerRef = useRef(null);
   const uppyRef = useRef(null);
   const [uploadStatus, setUploadStatus] = useState("");
@@ -48,12 +50,17 @@ export default function VideoUploader() {
     uppyRef.current = uppy;
 
     uppy.use(XHRUpload, {
-      endpoint: "http://localhost:5001/videos/",
+      endpoint: `${API_BASE_URL}/videos`,
       fieldName: "files",
+      allowedMetaFields: ["matchId"],
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (matchId) {
+      uppy.setMeta({ matchId });
+    }
 
     if (isDesktop) {
       uppy.use(Dashboard, {
@@ -72,8 +79,9 @@ export default function VideoUploader() {
     const successHandler = (file, response) => {
       setUploadStatus(`${file.name} uploaded successfully.`);
       setSelectedFileName(file.name);
-      console.log("File uploaded successfully:", file.name);
-      console.log("Server response:", response);
+      if (typeof onUploadSuccess === "function") {
+        onUploadSuccess(response?.body);
+      }
     };
 
     const errorHandler = (file, error) => {
@@ -86,7 +94,6 @@ export default function VideoUploader() {
       if (!result.successful.length) {
         setUploadStatus("No files were uploaded.");
       }
-      console.log("Upload complete! Files:", result.successful);
     };
 
     uppy.on("upload-success", successHandler);
@@ -100,7 +107,7 @@ export default function VideoUploader() {
 
       uppy.destroy();
     };
-  }, [isDesktop]);
+  }, [isDesktop, onUploadSuccess, matchId]);
 
   const handleMobileFileSelect = (event) => {
     const file = event.target.files?.[0];

@@ -1,8 +1,11 @@
 const express = require('express');
 const multer = require('multer');
+const mongoose = require('mongoose');
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 
 const Video = require('../models/Video');
+const Match = require('../models/Match');
+const TeamMembership = require('../models/TeamMembership');
 const s3 = require('../config/s3');
 const auth = require('../middleware/authMiddleware');
 
@@ -21,6 +24,27 @@ router.post(
   upload.single('files'),
   async (req, res) => {
     try {
+      const { matchId } = req.body || {};
+
+      if (!matchId || !mongoose.Types.ObjectId.isValid(matchId)) {
+        return res.status(400).json({ message: 'Valid matchId is required' });
+      }
+
+      const match = await Match.findById(matchId);
+      if (!match) {
+        return res.status(404).json({ message: 'Match not found' });
+      }
+
+      const membership = await TeamMembership.findOne({
+        team: match.team,
+        user: req.user.id,
+        status: 'active',
+      });
+
+      if (!membership) {
+        return res.status(403).json({ message: 'Access denied for this match' });
+      }
+
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
@@ -45,6 +69,7 @@ router.post(
         url,
         s3Key,
         uploadedBy: req.user.id,
+        match: match._id,
       });
 
       res.status(201).json(video);
@@ -58,7 +83,27 @@ router.post(
 
 router.get('/', auth, async (req, res) => {
   try {
-    const videos = await Video.find({ uploadedBy: req.user.id })
+    const { matchId } = req.query;
+    if (!matchId || !mongoose.Types.ObjectId.isValid(matchId)) {
+      return res.status(400).json({ message: 'Valid matchId query is required' });
+    }
+
+    const match = await Match.findById(matchId);
+    if (!match) {
+      return res.status(404).json({ message: 'Match not found' });
+    }
+
+    const membership = await TeamMembership.findOne({
+      team: match.team,
+      user: req.user.id,
+      status: 'active',
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: 'Access denied for this match' });
+    }
+
+    const videos = await Video.find({ match: match._id })
       .sort({ createdAt: -1 });
 
     res.json(videos);
@@ -70,10 +115,24 @@ router.get('/', auth, async (req, res) => {
 
 router.get('/:id/play', auth, async (req, res) => {
   try {
-    const video = await Video.findById(req.params.id);
+    const video = await Video.findById(req.params.id).populate('match', 'team');
 
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
+    }
+
+    if (!video.match?.team) {
+      return res.status(400).json({ message: 'Video is not linked to a valid match' });
+    }
+
+    const membership = await TeamMembership.findOne({
+      team: video.match.team,
+      user: req.user.id,
+      status: 'active',
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: 'Access denied for this video' });
     }
 
     const command = new GetObjectCommand({

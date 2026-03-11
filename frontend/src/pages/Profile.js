@@ -1,34 +1,87 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import { AuthContext } from '../context/AuthContext';
-import useAuth from '../hooks/useAuth'
+import useAuth from '../hooks/useAuth';
+import api from '../utils/api';
 import './Profile.css';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { logout } = useContext(AuthContext);
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john.doe@email.com');
+  const { user, updateUser } = useAuth();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [photoStatus, setPhotoStatus] = useState('Update your picture');
   const [passwordStatus, setPasswordStatus] = useState('Send a reset link');
-  const [teams, setTeams] = useState([
-    { name: 'Team 1', group: 'U12', role: 'Parent/Coach' },
-    { name: 'Team 2', group: 'U10', role: 'Parent' }
-  ]);
-
-  const [kids, setKids] = useState([
-    { name: 'Jake', team: 'Team 1', group: 'U12' },
-    { name: 'Josie', team: 'Team 2', group: 'U10' }
-  ]);
+  const [teams, setTeams] = useState([]);
+  const [kids, setKids] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const [profileError, setProfileError] = useState('');
 
   const [modalType, setModalType] = useState(null);
   const [form, setForm] = useState({ primary: '', secondary: '', tertiary: '' });
   const [payload, setPayload] = useState(null);
+  const [childTeamId, setChildTeamId] = useState('');
+
+  const loadProfileLists = async () => {
+    setLoadingData(true);
+    setProfileError('');
+
+    try {
+      const teamRes = await api.get('/teams');
+      const teamRows = (teamRes.data || []).map((team) => ({
+        id: team._id,
+        name: team.name,
+        role: team.membershipRole || 'member',
+      }));
+      setTeams(teamRows);
+
+      const kidResponses = await Promise.all(
+        teamRows.map(async (team) => {
+          const res = await api.get(`/teams/${team.id}/kids`);
+          return (res.data || []).map((kid) => ({
+            id: kid._id,
+            name: kid.name,
+            teamId: team.id,
+            teamName: team.name,
+            group: kid.ageGroup || '',
+          }));
+        })
+      );
+
+      setKids(kidResponses.flat());
+      if (teamRows.length > 0) {
+        setChildTeamId(teamRows[0].id);
+      }
+    } catch (err) {
+      console.error('Load profile lists error:', err);
+      setProfileError(err.response?.data?.message || 'Could not load account data.');
+      setTeams([]);
+      setKids([]);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    setName(user.username || '');
+    setEmail(user.email || '');
+  }, [user]);
+
+  useEffect(() => {
+    loadProfileLists();
+  }, []);
 
   const openModal = (type, data = {}) => {
     setModalType(type);
     setPayload(data);
+    setProfileError('');
 
     switch (type) {
       case 'name':
@@ -45,7 +98,7 @@ const Profile = () => {
         const team = teams[data.index] || {};
         setForm({
           primary: team.name || '',
-          secondary: team.group || '',
+          secondary: '',
           tertiary: team.role || ''
         });
         break;
@@ -54,13 +107,16 @@ const Profile = () => {
         const kid = kids[data.index] || {};
         setForm({
           primary: kid.name || '',
-          secondary: kid.team || '',
+          secondary: kid.teamName || '',
           tertiary: kid.group || ''
         });
         break;
       }
       case 'add':
         setForm({ primary: 'team', secondary: '', tertiary: '' });
+        if (teams.length > 0) {
+          setChildTeamId(teams[0].id);
+        }
         break;
       default:
         setForm({ primary: '', secondary: '', tertiary: '' });
@@ -71,16 +127,47 @@ const Profile = () => {
     setModalType(null);
     setPayload(null);
     setForm({ primary: '', secondary: '', tertiary: '' });
+    setProfileError('');
   };
 
-  const saveModal = () => {
+  const saveModal = async () => {
+    setProfileError('');
+
     switch (modalType) {
-      case 'name':
-        if (form.primary.trim()) setName(form.primary.trim());
+      case 'name': {
+        const username = form.primary.trim();
+        if (!username) {
+          setProfileError('Username is required.');
+          return;
+        }
+        try {
+          const res = await api.patch('/users/me', { username });
+          setName(res.data.username);
+          updateUser(res.data);
+        } catch (err) {
+          console.error('Update username error:', err);
+          setProfileError(err.response?.data?.message || 'Could not update username.');
+          return;
+        }
         break;
-      case 'email':
-        if (form.primary.trim()) setEmail(form.primary.trim());
+      }
+      case 'email': {
+        const nextEmail = form.primary.trim();
+        if (!nextEmail) {
+          setProfileError('Email is required.');
+          return;
+        }
+        try {
+          const res = await api.patch('/users/me', { email: nextEmail });
+          setEmail(res.data.email);
+          updateUser(res.data);
+        } catch (err) {
+          console.error('Update email error:', err);
+          setProfileError(err.response?.data?.message || 'Could not update email.');
+          return;
+        }
         break;
+      }
       case 'photo':
         setPhotoStatus('Photo updated');
         break;
@@ -89,35 +176,85 @@ const Profile = () => {
         break;
       case 'team': {
         if (payload?.index == null) break;
-        const next = [...teams];
-        next[payload.index] = {
-          name: form.primary.trim() || next[payload.index].name,
-          group: form.secondary.trim() || next[payload.index].group,
-          role: form.tertiary.trim() || next[payload.index].role
-        };
-        setTeams(next);
+        const team = teams[payload.index];
+        if (!team) break;
+
+        const teamName = form.primary.trim();
+        if (!teamName) {
+          setProfileError('Team name is required.');
+          return;
+        }
+
+        try {
+          await api.patch(`/teams/${team.id}`, { name: teamName });
+          await loadProfileLists();
+        } catch (err) {
+          console.error('Update team error:', err);
+          setProfileError(err.response?.data?.message || 'Could not update team.');
+          return;
+        }
         break;
       }
       case 'kid': {
         if (payload?.index == null) break;
-        const next = [...kids];
-        next[payload.index] = {
-          name: form.primary.trim() || next[payload.index].name,
-          team: form.secondary.trim() || next[payload.index].team,
-          group: form.tertiary.trim() || next[payload.index].group
-        };
-        setKids(next);
+        const kid = kids[payload.index];
+        if (!kid) break;
+
+        const kidName = form.primary.trim();
+        if (!kidName) {
+          setProfileError('Child name is required.');
+          return;
+        }
+
+        try {
+          await api.patch(`/teams/${kid.teamId}/kids/${kid.id}`, {
+            name: kidName,
+            ageGroup: form.tertiary.trim(),
+          });
+          await loadProfileLists();
+        } catch (err) {
+          console.error('Update kid error:', err);
+          setProfileError(err.response?.data?.message || 'Could not update child.');
+          return;
+        }
         break;
       }
       case 'add': {
         if (form.primary === 'team') {
-          if (!form.secondary.trim()) break;
-          const group = form.tertiary.trim() || 'U12';
-          setTeams([...teams, { name: form.secondary.trim(), group, role: 'Parent' }]);
+          const teamName = form.secondary.trim();
+          if (!teamName) {
+            setProfileError('Team name is required.');
+            return;
+          }
+          try {
+            await api.post('/teams', { name: teamName });
+            await loadProfileLists();
+          } catch (err) {
+            console.error('Create team error:', err);
+            setProfileError(err.response?.data?.message || 'Could not create team.');
+            return;
+          }
         } else {
-          if (!form.secondary.trim()) break;
-          const group = form.tertiary.trim() || 'U10';
-          setKids([...kids, { name: form.secondary.trim(), team: teams[0]?.name || 'Team', group }]);
+          const kidName = form.secondary.trim();
+          if (!kidName) {
+            setProfileError('Child name is required.');
+            return;
+          }
+          if (!childTeamId) {
+            setProfileError('Create a team before adding a child.');
+            return;
+          }
+          try {
+            await api.post(`/teams/${childTeamId}/kids`, {
+              name: kidName,
+              ageGroup: form.tertiary.trim(),
+            });
+            await loadProfileLists();
+          } catch (err) {
+            console.error('Create kid error:', err);
+            setProfileError(err.response?.data?.message || 'Could not add child.');
+            return;
+          }
         }
         break;
       }
@@ -157,7 +294,7 @@ const Profile = () => {
       <Modal isOpen={!!modalType} onClose={closeModal} title={titleMap[modalType] || 'Edit'}>
         {modalType === 'name' && (
           <>
-            <label className="modal-label">Name</label>
+            <label className="modal-label">Username</label>
             <input
               type="text"
               className="modal-input"
@@ -199,19 +336,12 @@ const Profile = () => {
               onChange={(e) => setForm({ ...form, primary: e.target.value })}
               autoFocus
             />
-            <label className="modal-label">Age group / league</label>
-            <input
-              type="text"
-              className="modal-input"
-              value={form.secondary}
-              onChange={(e) => setForm({ ...form, secondary: e.target.value })}
-            />
             <label className="modal-label">Role</label>
             <input
               type="text"
               className="modal-input"
               value={form.tertiary}
-              onChange={(e) => setForm({ ...form, tertiary: e.target.value })}
+              disabled
             />
           </>
         )}
@@ -231,7 +361,7 @@ const Profile = () => {
               type="text"
               className="modal-input"
               value={form.secondary}
-              onChange={(e) => setForm({ ...form, secondary: e.target.value })}
+              disabled
             />
             <label className="modal-label">Age group / league</label>
             <input
@@ -274,6 +404,16 @@ const Profile = () => {
               </>
             ) : (
               <>
+                <label className="modal-label">Team</label>
+                <select
+                  className="modal-select"
+                  value={childTeamId}
+                  onChange={(e) => setChildTeamId(e.target.value)}
+                >
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>{team.name}</option>
+                  ))}
+                </select>
                 <label className="modal-label">Child name</label>
                 <input
                   type="text"
@@ -294,6 +434,8 @@ const Profile = () => {
           </>
         )}
 
+        {profileError && <p className="profile-error-text">{profileError}</p>}
+
         <div className="modal-actions">
           <button className="pill-btn ghost" onClick={closeModal}>Cancel</button>
           <button className="pill-btn" onClick={saveModal}>Save</button>
@@ -302,19 +444,9 @@ const Profile = () => {
     );
   };
 
-  const { user } = useAuth();
-
   return (
     <div className="profile-container">
       <h1>Profile</h1>
-      {user ? (
-        <div className="profile-details">
-          <p><strong>Username:</strong> {user.username}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-        </div>
-      ) : (
-        <p>No user loaded.</p>
-      )}
 
       <section className="profile-section">
         <div className="section-head">
@@ -322,10 +454,13 @@ const Profile = () => {
         </div>
 
         <div className="card">
+          {profileError && <p className="profile-error-text">{profileError}</p>}
+          {loadingData && <p className="value">Loading account details...</p>}
+
           <div className="row">
             <div>
-              <p className="label">Name</p>
-              <p className="value">{name}</p>
+              <p className="label">Username</p>
+              <p className="value">{name || 'Not available'}</p>
             </div>
             <button className="pill-btn" onClick={editName}>Edit</button>
           </div>
@@ -341,7 +476,7 @@ const Profile = () => {
           <div className="row">
             <div>
               <p className="label">Email</p>
-              <p className="value">{email}</p>
+              <p className="value">{email || 'Not available'}</p>
             </div>
             <button className="pill-btn" onClick={updateEmail}>Update</button>
           </div>
@@ -363,22 +498,28 @@ const Profile = () => {
 
         <div className="card">
           <p className="subheading">Teams</p>
+          {!loadingData && teams.length === 0 && (
+            <p className="value">No teams yet.</p>
+          )}
           {teams.map((team, index) => (
-            <div className="row" key={team.name + index}>
+            <div className="row" key={team.id}>
               <div>
                 <p className="label">{team.name}</p>
-                <p className="value">{team.group} · {team.role}</p>
+                <p className="value">Role: {team.role}</p>
               </div>
               <button className="pill-btn" onClick={() => editTeam(index)}>Edit</button>
             </div>
           ))}
 
           <p className="subheading">Kids</p>
+          {!loadingData && kids.length === 0 && (
+            <p className="value">No kids added yet.</p>
+          )}
           {kids.map((kid, index) => (
-            <div className="row" key={kid.name + index}>
+            <div className="row" key={kid.id}>
               <div>
                 <p className="label">{kid.name}</p>
-                <p className="value">{kid.team} · {kid.group}</p>
+                <p className="value">{kid.teamName} · {kid.group || 'No age group'}</p>
               </div>
               <button className="pill-btn" onClick={() => editKid(index)}>Edit</button>
             </div>

@@ -35,7 +35,7 @@ api.interceptors.response.use(
 
       if(!isAuthEndpoint) {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.hash = '#/login';
       }
     }
     return Promise.reject(error);

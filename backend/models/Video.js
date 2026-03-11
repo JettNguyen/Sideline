@@ -19,6 +19,12 @@ const videoSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    match: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Match",
+      required: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );

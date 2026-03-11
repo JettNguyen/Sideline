@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
 
   //while checking for token
   if(loading) {
-    return <div>Loading...</div> //should prob make this look better
+    return <div>Loading...</div>
   }
 
   // if no user, redirect to login page
