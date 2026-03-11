@@ -7,23 +7,6 @@ import { formatLongDate } from '../utils/date';
 import { markMatchViewed } from '../utils/viewedMatches';
 import './GameDetails.css';
 
-const CLIP_TAGS_STORAGE_KEY = 'sideline.clipTags';
-
-const readStoredClipTags = () => {
-  try {
-    const raw = window.localStorage.getItem(CLIP_TAGS_STORAGE_KEY);
-    if (!raw) {
-      return {};
-    }
-
-    const parsed = JSON.parse(raw);
-    return typeof parsed === 'object' && parsed ? parsed : {};
-  } catch (err) {
-    console.error('Could not read clip tags:', err);
-    return {};
-  }
-};
-
 const formatSeconds = (seconds) => {
   const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
   const mins = Math.floor(safeSeconds / 60);
@@ -53,12 +36,11 @@ const GameDetails = () => {
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [selectedTag, setSelectedTag] = useState(null);
-  const [tagsByClip, setTagsByClip] = useState(() => readStoredClipTags());
   const [clipDurations, setClipDurations] = useState({});
   const [clipPreviewUrls, setClipPreviewUrls] = useState({});
 
   const activeClip = clips[currentClip] || null;
-  const activeClipTags = activeClip ? (tagsByClip[activeClip._id] || []) : [];
+  const activeClipTags = activeClip?.tags || [];
 
   useEffect(() => {
     const loadMatch = async () => {
@@ -79,10 +61,6 @@ const GameDetails = () => {
 
     loadMatch();
   }, [gameId]);
-
-  useEffect(() => {
-    window.localStorage.setItem(CLIP_TAGS_STORAGE_KEY, JSON.stringify(tagsByClip));
-  }, [tagsByClip]);
 
   const loadVideos = async () => {
     setIsLoadingClips(true);
@@ -267,21 +245,25 @@ const GameDetails = () => {
     videoRef.current.pause();
   };
 
-  const handleAddTagMoment = () => {
-    if (!selectedTag || !activeClip) {
-      return;
+  const handleAddTagMoment = async () => {
+    if (!selectedTag || !activeClip) return;
+
+    try {
+      const res = await api.post(`/videos/${activeClip._id}/tags`, {
+        label: selectedTag,
+        timeSec: Number(currentTime.toFixed(2)),
+      });
+
+      setClips((prev) =>
+        prev.map((clip) =>
+          clip._id === activeClip._id
+            ? { ...clip, tags: res.data }
+            : clip
+        )
+      );
+    } catch (err) {
+      console.error("Failed to add tag", err);
     }
-
-    const nextTag = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      label: selectedTag,
-      timeSec: Number(currentTime.toFixed(2)),
-    };
-
-    setTagsByClip((prev) => ({
-      ...prev,
-      [activeClip._id]: [...(prev[activeClip._id] || []), nextTag],
-    }));
   };
 
   const seekToMoment = (timeSec) => {
@@ -293,15 +275,25 @@ const GameDetails = () => {
     setCurrentTime(timeSec);
   };
 
-  const removeTagMoment = (tagId) => {
-    if (!activeClip) {
-      return;
-    }
+  const removeTagMoment = async (tagId) => {
+    if (!activeClip) return;
 
-    setTagsByClip((prev) => ({
-      ...prev,
-      [activeClip._id]: (prev[activeClip._id] || []).filter((tag) => tag.id !== tagId),
-    }));
+    try {
+      await api.delete(`/videos/${activeClip._id}/tags/${tagId}`);
+
+      setClips((prev) =>
+        prev.map((clip) =>
+          clip._id === activeClip._id
+            ? {
+                ...clip,
+                tags: clip.tags.filter((tag) => tag._id !== tagId),
+              }
+            : clip
+        )
+      );
+    } catch (err) {
+      console.error("Failed to delete tag", err);
+    }
   };
 
   const currentClipDurationLabel = useMemo(() => {
@@ -393,7 +385,7 @@ const GameDetails = () => {
             <div className="time-marker-track" aria-hidden="true">
               {scrubMarkers.map((tag) => (
                 <button
-                  key={tag.id}
+                  key={tag._id}
                   type="button"
                   className="time-marker"
                   style={{ left: `${tag.leftPercent}%` }}
@@ -431,7 +423,7 @@ const GameDetails = () => {
         ) : (
           <div className="moment-log-list">
             {activeClipTags.map((tag) => (
-              <div key={tag.id} className="moment-log-item">
+              <div key={tag._id} className="moment-log-item">
                 <button
                   type="button"
                   className="moment-log-jump-btn"
@@ -443,7 +435,7 @@ const GameDetails = () => {
                 <button
                   type="button"
                   className="moment-log-remove-btn"
-                  onClick={() => removeTagMoment(tag.id)}
+                  onClick={() => removeTagMoment(tag._id)}
                   aria-label={`Remove ${tag.label} moment at ${formatSeconds(tag.timeSec)}`}
                   title="Remove tagged moment"
                 >

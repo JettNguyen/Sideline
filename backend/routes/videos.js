@@ -152,5 +152,75 @@ router.get('/:id/play', auth, async (req, res) => {
   }
 });
 
+router.post('/:id/tags', auth, async (req, res) => {
+  try {
+    const { label, timeSec } = req.body;
+
+    if (!label || timeSec === undefined) {
+      return res.status(400).json({ message: 'label and timeSec are required' });
+    }
+
+    const video = await Video.findById(req.params.id).populate('match', 'team');
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const membership = await TeamMembership.findOne({
+      team: video.match.team,
+      user: req.user.id,
+      status: 'active',
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: 'Access denied for this video' });
+    }
+
+    video.tags.push({
+      label,
+      timeSec,
+    });
+
+    await video.save();
+
+    res.json(video.tags);
+  } catch (err) {
+    console.error('Add tag error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+router.delete('/:videoId/tags/:tagId', auth, async (req, res) => {
+  try {
+    const { videoId, tagId } = req.params;
+
+    const video = await Video.findById(videoId).populate('match', 'team');
+
+    if (!video) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const membership = await TeamMembership.findOne({
+      team: video.match.team,
+      user: req.user.id,
+      status: 'active',
+    });
+
+    if (!membership) {
+      return res.status(403).json({ message: 'Access denied for this video' });
+    }
+
+    video.tags = video.tags.filter(tag => tag._id.toString() !== tagId);
+
+    await video.save();
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error('Delete tag error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;
