@@ -1,0 +1,7 @@
+1. From 3/6 to 3/13, I have spent around 25 hours total on this project. My schedule was freed up a bit more this week due to less responsibilities and more time to work on this project. I worked on it every day throughout the week.
+
+2. The presentation layout, live demo outline, app preparation, and coding integrations have all been done by me to help close out this sprint. For the presentation, I redid our template and helped assign roles. For the demo, I planned the flow and executed it live. For app preparation and development, I finalized some of the features that were needed and filled in mock data on the server side. 
+
+3. This week, I had to freshen up on some of my backend implementation skills to get the app flow working. I have not used them in a while, but I found a bit more appreciation in it doing so. Other than that, the presentation and live demo has been an extension of my experience in these things in courses and work.
+
+4. I was not expecting to take over some of the backend implementation heading into this project, but I communicated with some of my team members and got it done. This was something that I wanted to do to make the app feel more presentable for the progress check. As a lesson learned, I feel I can take on extra responsibilities, as long as I communicate it and it does not disturb the current development.
