@@ -29,7 +29,8 @@
 
 .App {
   min-height: 100vh;
-  background: 
+  background-color: var(--color-bg);
+  background-image: 
     radial-gradient(ellipse at center, var(--color-bg-soft) 0%, var(--color-bg) 100%),
     repeating-linear-gradient(
       0deg,
@@ -41,6 +42,11 @@
   background-attachment: fixed;
   color: var(--color-text);
 }
+
+html, body, #root {
+  background-color: var(--color-bg);
+}
+
 
 .app-header {
   position: sticky;

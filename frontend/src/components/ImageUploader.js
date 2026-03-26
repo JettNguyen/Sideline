@@ -48,23 +48,23 @@ export default function ImageUploader({ onUploadSuccess }) {
     uppyRef.current = uppy;
 
     uppy.use(ImageEditor, {
+      id: 'ImageEditor',
       quality: 0.8,
       cropperOptions: { aspectRatio: 1 },
       replaceFile: true,
     });
 
-    if (isDesktop) {
-      uppy.use(Dashboard, {
-        inline: true,
-        target: containerRef.current,
-        height: 400,
-        showProgressDetails: true,
-        note: "Accepted file types: jpg, jpeg, png",
-        proudlyDisplayPoweredByUppy: false,
-        showLinkToFileUploadResult: false,
-        theme: "dark",
-      });
-    }
+    uppy.use(Dashboard, {
+      id: 'Dashboard',
+      inline: isDesktop,
+      target: isDesktop ? containerRef.current : (typeof document !== 'undefined' ? 'body' : undefined),
+      height: 400,
+      showProgressDetails: true,
+      note: "Accepted file types: jpg, jpeg, png",
+      proudlyDisplayPoweredByUppy: false,
+      showLinkToFileUploadResult: false,
+      theme: "dark",
+    });
 
     uppy.use(XHRUpload, {
       endpoint: `${API_BASE_URL}/images`,
@@ -113,6 +113,9 @@ export default function ImageUploader({ onUploadSuccess }) {
     setPreviewUrl(objectUrl);
     setSelectedFileName(file.name);
     setUploadStatus("");
+
+    // open editor after selecting image
+    openEditor();
   };
 
   const handleUpload = async () => {
@@ -124,16 +127,57 @@ export default function ImageUploader({ onUploadSuccess }) {
     await uppy.upload();
   };
 
+  const openEditor = () => {
+    const uppy = uppyRef.current;
+    if (!uppy) return;
+
+    const dashboard = uppy.getPlugin('Dashboard');
+    if (dashboard && typeof dashboard.open === 'function') {
+      dashboard.open();
+      return;
+    }
+
+    console.warn('No dashboard plugin available to open editor');
+  };
+
   return (
     <div className="image-uploader">
       <h2 className="image-uploader-title">Upload Profile Picture</h2>
+
+      {previewUrl && (
+        <div className="preview-row">
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="preview-image"
+            style={{
+              width: 150,
+              height: 150,
+              objectFit: "cover",
+              borderRadius: "50%",
+            }}
+          />
+          <button
+            className="edit-square"
+            onClick={openEditor}
+            aria-label="Edit or crop image"
+            title="Edit / Crop"
+          >
+            <i className="fas fa-edit" />
+          </button>
+        </div>
+      )}
+
+      {selectedFileName && <p className="upload-meta">Selected: {selectedFileName}</p>}
+      {uploadStatus && <p className="upload-meta">{uploadStatus}</p>}
+      {!selectedFileName && <p className="upload-meta">No image selected</p>}
 
       {isDesktop ? (
         <div ref={containerRef} />
       ) : (
         <div className="mobile-upload-actions">
           <label className="mobile-file-label" htmlFor="image-file">
-            Choose Image
+            Choose Photo
           </label>
           <input
             id="image-file"
@@ -142,31 +186,14 @@ export default function ImageUploader({ onUploadSuccess }) {
             onChange={handleFileSelect}
             className="mobile-file-input"
           />
-          <button className="mobile-upload-btn" onClick={handleUpload}>
-            Upload from device
-          </button>
+
+          {selectedFileName && (
+            <button className="mobile-upload-btn" onClick={handleUpload}>
+              Upload
+            </button>
+          )}
         </div>
       )}
-
-      {previewUrl && (
-        <img
-          src={previewUrl}
-          alt="Preview"
-          className="preview-image"
-          style={{
-            width: 150,
-            height: 150,
-            objectFit: "cover",
-            borderRadius: "50%",
-            marginTop: "10px",
-          }}
-        />
-      )}
-
-      {selectedFileName && <p className="upload-meta">Selected: {selectedFileName}</p>}
-      {uploadStatus && <p className="upload-meta">{uploadStatus}</p>}
-
-      {!isDesktop && !selectedFileName && <p className="upload-meta">No image selected</p>}
     </div>
   );
 }
