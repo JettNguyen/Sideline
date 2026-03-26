@@ -32,7 +32,7 @@
 }
 
 .dashboard-add-btn:hover {
-    background: var(--color-accent-secondary-strong);
+    background: var(--color-accent-secondary-hover);
 }
 
 .dashboard-add-btn:active {
@@ -80,7 +80,7 @@
 }
 
 .team-create-btn:hover {
-    background: var(--color-accent-strong);
+    background: var(--color-accent-hover);
 }
 
 .team-create-btn:active {
@@ -166,7 +166,7 @@
 }
 
 .team-card-header:hover {
-    background: var(--color-accent-strong);
+    background: var(--color-accent-hover);
 }
 
 .team-card-header h2 {
@@ -229,7 +229,7 @@
 }
 
 .recent-game:hover .date {
-    color: var(--color-accent-secondary-strong);
+    color: var(--color-accent-secondary-hover);
 }
 
 .no-games {

@@ -48,7 +48,11 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Login failed:', err);
       const message = err.response?.data?.message || 'Login failed. Please try again.';
-      return { success: false, message };
+      return {
+        success: false,
+        message,
+        requiresEmailVerification: !!err.response?.data?.requiresEmailVerification,
+      };
     }
   };
 

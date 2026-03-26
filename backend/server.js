@@ -13,13 +13,14 @@ const app = express();
 
 const allowedOrigins = (process.env.CLIENT_ORIGIN || '')
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
     .filter(Boolean);
 
 const corsOptions = allowedOrigins.length
     ? {
         origin(origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
+            const normalized = origin ? origin.replace(/\/+$/, '') : origin;
+            if (!origin || allowedOrigins.includes(normalized)) {
                 return callback(null, true);
             }
 

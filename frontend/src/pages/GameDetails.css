@@ -281,7 +281,7 @@
 }
 
 .time-marker:hover {
-    background: var(--color-accent-secondary-strong);
+    background: var(--color-accent-secondary-hover);
 }
 
 .time-display {
@@ -332,7 +332,7 @@
 
 .add-clip-btn:hover {
     background: var(--color-surface-3);
-    color: var(--color-accent-secondary-strong);
+    color: var(--color-accent-secondary-hover);
 }
 
 .add-clip-btn:active {

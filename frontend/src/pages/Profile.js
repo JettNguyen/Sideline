@@ -497,12 +497,12 @@ const Profile = () => {
         </div>
 
         <div className="card">
-          <p className="subheading">Teams</p>
+          <p className="label">Teams</p>
           {!loadingData && teams.length === 0 && (
             <p className="value">No teams yet.</p>
           )}
           {teams.map((team, index) => (
-            <div className="row" key={team.id}>
+            <div className="row-team-kid" key={team.id}>
               <div>
                 <p className="label">{team.name}</p>
                 <p className="value">Role: {team.role}</p>
@@ -511,12 +511,12 @@ const Profile = () => {
             </div>
           ))}
 
-          <p className="subheading">Kids</p>
+          <p className="label">Kids</p>
           {!loadingData && kids.length === 0 && (
             <p className="value">No kids added yet.</p>
           )}
           {kids.map((kid, index) => (
-            <div className="row" key={kid.id}>
+            <div className="row-team-kid" key={kid.id}>
               <div>
                 <p className="label">{kid.name}</p>
                 <p className="value">{kid.teamName} · {kid.group || 'No age group'}</p>

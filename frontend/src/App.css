@@ -14,9 +14,9 @@
 
   --color-border: #767676;
 
-  --color-accent: #20b020;
-  --color-accent-hover: #27ba27;
-  --color-accent-strong: #34d934;
+  --color-accent: #10aa10;
+  --color-accent-hover: #30bb30;
+  --color-accent-strong: #50cc50;
 
   --color-accent-secondary: #2f6fe0;
   --color-accent-secondary-hover: #2b8bf0;
@@ -67,7 +67,7 @@
 }
 
 .header-back-btn:hover {
-  color: var(--color-accent-secondary-strong);
+  color: var(--color-accent-secondary-hover);
 }
 
 .header-back-btn:active {
@@ -87,7 +87,7 @@
 }
 
 .header-profile-btn:hover {
-  color: var(--color-accent-secondary-strong);
+  color: var(--color-accent-secondary-hover);
 }
 
 .header-profile-btn:active {

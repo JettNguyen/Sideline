@@ -7,6 +7,7 @@
 
 .profile-section h2 {
     font-size: 18px;
+    letter-spacing: 1px;
     margin: 0;
 }
 
@@ -37,25 +38,33 @@
     gap: 10px;
 }
 
+.row-team-kid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 20px;
+}
+
 .row + .row {
     border-top: 1px solid var(--color-shadow-white);
     padding-top: 10px;
 }
 
 .label {
-    font-size: 14px;
+    font-size: 16px;
     margin: 0;
     color: var(--color-text);
 }
 
 .value {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--color-text-muted);
     margin: 5px 0 0 0;
 }
 
 .profile-error-text {
-    color: red;
+    color: #d02222;
     margin: 0 0 10px;
     font-size: 14px;
 }
@@ -85,7 +94,7 @@
 .pill-btn.ghost:hover {
     background: rgba(43, 139, 240, 0.2);
     border-color: var(--color-accent-secondary-hover);
-    color: var(--color-accent-secondary-strong);
+    color: var(--color-accent-secondary-hover);
 }
 
 .pill-btn:active {
@@ -107,7 +116,7 @@
 }
 
 .signout-btn:hover {
-    background: var(--color-accent-hover);
+    background: #d02222;
 }
 
 .signout-btn:active {
@@ -115,7 +124,7 @@
 }
 
 .subheading {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--color-text-muted);
     margin: 5px 0;
 }
