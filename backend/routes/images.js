@@ -51,13 +51,16 @@ router.post(
         { new: true }
       );
 
-      res.status(200).json({
-        s3Key,
-        user,
+      const getCommand = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: s3Key,
       });
 
-      res.status(200).json({
-        url,
+      const signedUrl = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+
+      return res.status(200).json({
+        s3Key,
+        url: signedUrl,
         user,
       });
 
