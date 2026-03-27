@@ -10,7 +10,7 @@
     "@uppy/react": "^5.2.0",
     "@uppy/xhr-upload": "^5.1.1",
     "axios": "^1.13.4",
-    "react": "^18.2.0",
+    "react": "^19.2.4",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.13.2",
     "react-scripts": "^5.0.1"
