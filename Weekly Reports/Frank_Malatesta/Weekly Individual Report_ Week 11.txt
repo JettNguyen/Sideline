@@ -1,0 +1,17 @@
+﻿Week 11
+Name: Frank Malatesta | Group: Trainers
+Time Dedicated to the Project
+The following is an estimate of the amount of time I spent on each task this week:
+* Weekly group meeting: ~30 minutes
+* Research into video synchronization via audio: ~3 hours
+* Code review and testing: ~3 hours
+Staying consistent with our weekly group meetings will keep our team committed and focused towards completing our project.
+Contribution to the Project Development Process
+I conducted research into methods of synchronizing videos based on their audio. I had already done some research on this early in the semester which made this process much easier. This is all for the feature that we hope to add to our software so that the videos can be synchronized together and multiple feeds of the same gameplay can be played simultaneously for a free-flowing user experience.
+I also tested the major changes to our software that have been made in the past two weeks (considering the work that was done over spring break). We had made a test deploy build that had some complications due to missing environment variables that was eventually resolved.
+Demonstration of Applied Knowledge
+I used my prior knowledge of how to synchronize videos based on audio to guide my practical research of how it could be done by us in practice.
+I also used my knowledge of code review to test our deploy build and ensure that all the cases we had accounted for were working as intended on different machines.
+Reflection and Lessons Learned
+As we continue to get more work from other classes as the semester intensifies, we will have to remain dedicated to the project to not let our effort slip. I think if we continue to motivate each other and plan clearly and early, we will steer away from many potential issues we would otherwise face.
+I am very satisfied with our progress so far and how we’ve worked to make a cohesive design for our project.
