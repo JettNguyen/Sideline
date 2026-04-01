@@ -14,9 +14,9 @@
 
   --color-border: #767676;
 
-  --color-accent: #20b020;
-  --color-accent-hover: #27ba27;
-  --color-accent-strong: #34d934;
+  --color-accent: #10aa10;
+  --color-accent-hover: #30bb30;
+  --color-accent-strong: #50cc50;
 
   --color-accent-secondary: #2f6fe0;
   --color-accent-secondary-hover: #2b8bf0;
@@ -29,7 +29,8 @@
 
 .App {
   min-height: 100vh;
-  background: 
+  background-color: var(--color-bg);
+  background-image: 
     radial-gradient(ellipse at center, var(--color-bg-soft) 0%, var(--color-bg) 100%),
     repeating-linear-gradient(
       0deg,
@@ -42,18 +43,51 @@
   color: var(--color-text);
 }
 
+html, body, #root {
+  background-color: var(--color-bg);
+}
+
+
 .app-header {
   position: sticky;
   top: env(safe-area-inset-top);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 10px 15px 10px;
   z-index: 100;
   background-color: var(--color-shadow);
+  min-height: 56px;
+  overflow: hidden;
 }
 
-.header-back-btn {
+.brand-container {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: left 250ms ease, transform 250ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-container.center {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.brand-container.left {
+  left: 16px;
+  transform: translateY(-50%);
+}
+
+.header-back-btn,
+.header-profile-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
   background: none;
   border: none;
   color: var(--color-text);
@@ -66,12 +100,42 @@
   transition: color 0.2s, transform 0.2s;
 }
 
+
+.header-profile-btn {
+  right: 10px;
+}
+
+.app-header.has-back .brand-container {
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.app-header.no-back .brand-container {
+  left: 16px;
+  transform: translateY(-50%);
+}
+
+
+.header-back-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 5px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+}
+
 .header-back-btn:hover {
-  color: var(--color-accent-secondary-strong);
+  color: var(--color-accent-secondary-hover);
 }
 
 .header-back-btn:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 .header-profile-btn {
@@ -87,11 +151,11 @@
 }
 
 .header-profile-btn:hover {
-  color: var(--color-accent-secondary-strong);
+  color: var(--color-accent-secondary-hover);
 }
 
 .header-profile-btn:active {
-  transform: scale(0.95);
+  transform: translateY(-50%) scale(0.95);
 }
 
 @media (hover: none) {
@@ -158,4 +222,54 @@ p {
   .container {
     padding: 20px;
   }
+}
+
+.header-profile-pic {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.page-transition {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.page-transition.page-exiting {
+  opacity: 0;
+  transform: translateY(-25px);
+}
+
+.page-transition.page-entering {
+  opacity: 0;
+  transform: translateY(25px);
+}
+
+.page-transition.page-entered {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.protected-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-text);
+  opacity: 0.9;
+}
+
+select,
+.modal-select {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+select:focus,
+.modal-select:focus {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 3px rgba(46, 139, 255, 0.35);
+  border-color: var(--color-accent-secondary);
 }

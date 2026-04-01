@@ -1,3 +1,5 @@
+// This file is for GitHub pages deployment
+
 const fs = require('fs');
 const path = require('path');
 

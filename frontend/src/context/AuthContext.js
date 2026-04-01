@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../utils/api';
 
 export const AuthContext = createContext();
@@ -48,7 +48,11 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error('Login failed:', err);
       const message = err.response?.data?.message || 'Login failed. Please try again.';
-      return { success: false, message };
+      return {
+        success: false,
+        message,
+        requiresEmailVerification: !!err.response?.data?.requiresEmailVerification,
+      };
     }
   };
 
@@ -71,4 +75,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  return useContext(AuthContext);
 };

@@ -4,7 +4,7 @@ const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Get /api/users/me
+// GET /api/users/me
 router.get('/me', auth, async(req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-passwordHash');
@@ -16,6 +16,8 @@ router.get('/me', auth, async(req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            profilePicture: user.profilePicture,
+            isEmailVerified: user.isEmailVerified,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         });
@@ -25,7 +27,7 @@ router.get('/me', auth, async(req, res) => {
     }
 });
 
-// Patch /api/users/me
+// PATCH /api/users/me
 router.patch('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
@@ -34,7 +36,7 @@ router.patch('/me', auth, async (req, res) => {
         }
 
         const nextUsername = req.body?.username?.trim();
-        const nextEmail = req.body?.email?.trim();
+        const nextEmail = req.body?.email?.trim().toLowerCase();
 
         if (nextUsername) {
             const existingUsername = await User.findOne({
@@ -68,6 +70,8 @@ router.patch('/me', auth, async (req, res) => {
             _id: user._id,
             username: user.username,
             email: user.email,
+            profilePicture: user.profilePicture,
+            isEmailVerified: user.isEmailVerified,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         });

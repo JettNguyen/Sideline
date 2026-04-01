@@ -226,7 +226,7 @@ const Team = () => {
                   <span className="game-opponent">vs {game.opponent}</span>
                   <span className="game-date">{formatDate(game.date)}</span>
                 </div>
-                <i className="fas fa-chevron-right"></i>
+                <i className="fas fa-arrow-right"></i>
               </Link>
             ))}
           </div>

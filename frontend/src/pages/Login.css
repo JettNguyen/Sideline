@@ -12,7 +12,7 @@
     flex-direction: column;
     align-items: center;
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
 }
 
 .welcome-text {
@@ -33,7 +33,6 @@
 }
 
 .login-title {
-    font-family: 'Jersey 10', sans-serif;
     font-size: 36px;
     font-weight: 400;
     color: var(--color-text);
@@ -64,22 +63,41 @@
 }
 
 .form-label {
-    font-family: 'Jersey 10', sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 400;
     color: var(--color-text);
     display: block;
-    margin-bottom: 0;
+    margin-bottom: 5px;
     margin-left: 5px;
     letter-spacing: 1px;
     filter: drop-shadow(0 0 10px var(--color-shadow-strong));
 }
 
+.username-static {
+    padding: 0 15px;
+    margin-top: 10px;
+    background-color: var(--color-surface-3);
+    filter: drop-shadow(5px 5px 10px var(--color-shadow-strong));
+    border-radius: 10px;
+    color: var(--color-text);
+    font-size: 18px;
+    letter-spacing: 1px;
+    line-height: 1.5;
+    display: block;
+    align-items: center;
+}
+
+.info-text {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin: 15px 5px;
+}
+
 .form-input {
     width: 100%;
     padding: 5px 10px;
-    font-family: 'Jersey 10', sans-serif;
-    font-size: 14px;
+    font-size: 18px;
+    letter-spacing: 1px;
     background: var(--color-surface-3);
     border: 2px solid var(--color-border);
     border-radius: 10px;
@@ -119,7 +137,6 @@
     padding: 5px;
     display: flex;
     align-items: center;
-    justify-content: center;
     transition: color 0.2s;
 }
 
@@ -130,7 +147,6 @@
 .login-button {
     width: 100%;
     padding: 10px;
-    font-family: 'Jersey 10', sans-serif;
     font-size: 20px;
     font-weight: 400;
     color: var(--color-text);
@@ -145,11 +161,21 @@
 }
 
 .login-button:hover {
-    background: var(--color-accent-strong);
+    background: var(--color-accent-hover);
 }
 
 .login-button:active {
     transform: scale(0.95);
+}
+
+.login-button:disabled {
+    background: var(--color-accent);
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.login-button:disabled:hover {
+    background: var(--color-accent);
 }
 
 .forgot-password-button {
@@ -160,12 +186,12 @@
     background: none;
     border: none;
     color: var(--color-text-muted);
-    font-family: 'Jersey 10', sans-serif;
     font-size: 14px;
     letter-spacing: 0.7px;
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;
+    transition: color 0.2s, transform 0.2s;
 }
 
 .forgot-password-button:hover {
@@ -200,10 +226,52 @@
     transform: scale(0.95);
 }
 
+.success-text {
+  color: #1f9d55;
+  text-align: center;
+  margin-top: 10px;
+}
+
 .error-text {
     color: red;
     margin-top: 0.5rem;
     font-size: 0.9rem;
+}
+
+.action-primary {
+    background: var(--color-accent);
+    color: var(--color-text);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.action-primary:hover {
+    background: var(--color-accent-hover);
+}
+
+.action-primary:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.action-secondary {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 2px solid var(--color-border);
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s, transform 0.2s;
+}
+
+.action-secondary:hover {
+    color: var(--color-text);
 }
 
 @media (min-width: 500px) {

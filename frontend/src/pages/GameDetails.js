@@ -343,68 +343,72 @@ const GameDetails = () => {
         <p className="matchup-date">{formatDate(game.date)}</p>
       </div>
 
-      <div className="main-player">
-        <div className="video-container">
-          {videoUrl ? (
-            <video
-              ref={videoRef}
-              className="video-player"
-              key={activeClip?._id || 'no-clip'}
-              onLoadedMetadata={handleLoadedMetadata}
-              onTimeUpdate={handleTimeUpdate}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
-            >
-              <source src={videoUrl} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <div className="video-placeholder">
-              <i className="fas fa-play"></i>
+      {clips.length === 0 ? (
+        <p className="clips-empty-text-video">No clips available. Upload one to view playback.</p>
+      ) : (
+        <>
+          <div className="main-player">
+            <div className="video-container">
+              {videoUrl ? (
+                <video
+                  ref={videoRef}
+                  className="video-player"
+                  key={activeClip?._id || 'no-clip'}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onTimeUpdate={handleTimeUpdate}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onEnded={() => setIsPlaying(false)}
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <div className="video-placeholder">
+                  <i className="fas fa-play"></i>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <div className="video-controls">
-          <button className="play-toggle-btn" onClick={togglePlayPause} disabled={!videoUrl}>
-            <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
-            {isPlaying ? 'Pause' : 'Play'}
-          </button>
+            <div className="video-controls">
+              <button className="play-toggle-btn" onClick={togglePlayPause} disabled={!videoUrl}>
+                <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
+                {isPlaying ? 'Pause' : 'Play'}
+              </button>
 
-          <div className="time-slider-wrap">
-            <input
-              type="range"
-              className="time-slider"
-              min="0"
-              max={sliderMax}
-              step="0.1"
-              value={Math.min(currentTime, sliderMax)}
-              onChange={handleScrub}
-              disabled={!videoUrl}
-            />
-            <div className="time-marker-track" aria-hidden="true">
-              {scrubMarkers.map((tag) => (
-                <button
-                  key={tag._id}
-                  type="button"
-                  className="time-marker"
-                  style={{ left: `${tag.leftPercent}%` }}
-                  onClick={() => seekToMoment(tag.timeSec)}
-                  title={`${tag.label} at ${formatSeconds(tag.timeSec)}`}
+              <div className="time-slider-wrap">
+                <input
+                  type="range"
+                  className="time-slider"
+                  min="0"
+                  max={sliderMax}
+                  step="0.1"
+                  value={Math.min(currentTime, sliderMax)}
+                  onChange={handleScrub}
+                  disabled={!videoUrl}
                 />
-              ))}
+                <div className="time-marker-track" aria-hidden="true">
+                  {scrubMarkers.map((tag) => (
+                    <button
+                      key={tag._id}
+                      type="button"
+                      className="time-marker"
+                      style={{ left: `${tag.leftPercent}%` }}
+                      onClick={() => seekToMoment(tag.timeSec)}
+                      title={`${tag.label} at ${formatSeconds(tag.timeSec)}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="time-display">
+                <span>{formatSeconds(currentTime)}</span>
+                <span>{currentClipDurationLabel}</span>
+              </div>
+
+              {videoError && <p className="video-error-text">{videoError}</p>}
             </div>
           </div>
-          <div className="time-display">
-            <span>{formatSeconds(currentTime)}</span>
-            <span>{currentClipDurationLabel}</span>
-          </div>
 
-          {videoError && <p className="video-error-text">{videoError}</p>}
-        </div>
-      </div>
-
-      <div className="moment-tags">
+          <div className="moment-tags">
         {quickTags.map((label) => (
           <button 
             key={label} 
@@ -447,6 +451,8 @@ const GameDetails = () => {
           </div>
         )}
       </div>
+      </>
+      )}
 
       <div className="clips-section">
         <div className="clips-header">

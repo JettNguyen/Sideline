@@ -247,7 +247,7 @@ const Home = () => {
                   </span>
                 )}
               </div>
-              <i className="fas fa-chevron-right"></i>
+              <i className="fas fa-arrow-right"></i>
             </Link>
             
             <div className="recent-games">
@@ -290,9 +290,13 @@ const Home = () => {
             <i className={`fas ${openSections.recentGames ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
           </button>
 
-          {openSections.recentGames && (
-            <div id="recent-games-feed" className="feed-content">
-              {recentGamesFeed.map((game) => (
+          <div
+            id="recent-games-feed"
+            className={`feed-content ${openSections.recentGames ? 'open' : ''}`}
+            aria-hidden={!openSections.recentGames}
+          >
+            {recentGamesFeed.length > 0 ? (
+              recentGamesFeed.map((game) => (
                 <Link
                   key={`${game.teamId}-${game.id}`}
                   to={`/team/${game.teamId}/game/${game.id}`}
@@ -304,9 +308,11 @@ const Home = () => {
                   </div>
                   <span className="feed-date">{formatDate(game.date)}</span>
                 </Link>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <p className="no-games">No recent games in feed.</p>
+            )}
+          </div>
         </div>
 
         <div className="feed-card">
@@ -327,9 +333,13 @@ const Home = () => {
             <i className={`fas ${openSections.upcomingMatches ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
           </button>
 
-          {openSections.upcomingMatches && (
-            <div id="upcoming-matches-feed" className="feed-content">
-              {upcomingMatchesFeed.map((match) => (
+          <div
+            id="upcoming-matches-feed"
+            className={`feed-content ${openSections.upcomingMatches ? 'open' : ''}`}
+            aria-hidden={!openSections.upcomingMatches}
+          >
+            {upcomingMatchesFeed.length > 0 ? (
+              upcomingMatchesFeed.map((match) => (
                 <Link
                   key={match.id}
                   to={`/team/${match.teamId}/game/${match.id}`}
@@ -341,9 +351,11 @@ const Home = () => {
                   </div>
                   <span className="feed-date">{formatDate(match.date)}</span>
                 </Link>
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <p className="no-games">No upcoming matches in feed.</p>
+            )}
+          </div>
         </div>
       </div>
 
