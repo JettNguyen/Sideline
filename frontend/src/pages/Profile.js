@@ -18,6 +18,7 @@ const Profile = () => {
   const [email, setEmail] = useState('');
   const [photoStatus, setPhotoStatus] = useState('Update your picture');
   const [passwordStatus, setPasswordStatus] = useState('Send a reset link');
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [teams, setTeams] = useState([]);
   const [kids, setKids] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -254,7 +255,17 @@ const Profile = () => {
         setPhotoStatus('Photo updated');
         break;
       case 'reset':
-        setPasswordStatus('Reset link sent');
+        try {
+          setIsSendingPasswordReset(true);
+          await api.post('/auth/request-password-reset', { email: email.trim() });
+          setPasswordStatus('Reset link sent');
+        } catch (err) {
+          console.error('Request password reset error:', err);
+          setProfileError(err.response?.data?.message || 'Could not send reset link.');
+          return;
+        } finally {
+          setIsSendingPasswordReset(false);
+        }
         break;
       case 'team': {
         if (payload?.index == null) break;
@@ -545,8 +556,14 @@ const Profile = () => {
 
         {modalType !== 'photo' && (
           <div className="modal-actions">
-            <button className="modal-btn modal-btn-cancel" onClick={closeModal}>Cancel</button>
-            <button className="modal-btn modal-btn-primary" onClick={saveModal}>Save</button>
+            <button className="modal-btn modal-btn-cancel" onClick={closeModal} disabled={isSendingPasswordReset}>
+              Cancel
+            </button>
+            <button className="modal-btn modal-btn-primary" onClick={saveModal} disabled={isSendingPasswordReset}>
+              {modalType === 'reset'
+                ? (isSendingPasswordReset ? 'Sending...' : 'Yes')
+                : 'Save'}
+            </button>
           </div>
         )}
       </Modal>

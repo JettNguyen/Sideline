@@ -197,7 +197,14 @@ router.post('/request-password-reset', async (req, res) => {
 
         const resetUrl = buildTokenUrl(rawToken, 'resetToken');
 
-        await sendPasswordResetEmail({ to: user.email, username: user.username, resetUrl });
+        try {
+            await sendPasswordResetEmail({ to: user.email, username: user.username, resetUrl });
+        } catch (emailErr) {
+            console.error('Password reset email send failed:', emailErr);
+            return res.status(502).json({
+                message: 'Password reset email could not be sent. Please try again shortly.',
+            });
+        }
 
         res.json({ message: 'Password reset email sent' });
     } catch (err) {

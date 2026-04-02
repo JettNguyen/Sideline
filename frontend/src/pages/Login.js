@@ -100,6 +100,9 @@ useEffect(() => {
         }else {
           setError(result.message || 'Login failed.');
           if (result.requiresEmailVerification) {
+            if (username.includes('@') && !email) {
+              setEmail(username);
+            }
             setShowResendVerification(true);
           }
         }
@@ -111,6 +114,9 @@ useEffect(() => {
       setMessage('');
 
       if (err.response?.data?.requiresEmailVerification) {
+        if (username.includes('@') && !email) {
+          setEmail(username);
+        }
         setShowResendVerification(true);
       }
     } finally {
@@ -223,15 +229,17 @@ useEffect(() => {
           
           {(isRegistering || showResendVerification || showForgotPassword) && (
             <div className="form-group">
-              <label htmlFor="email" className="form-label">Email</label>
+              <label htmlFor="email" className="form-label">
+                {showResendVerification ? 'Email (optional)' : 'Email'}
+              </label>
               <input
                 type="email"
                 id="email"
                 className="form-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required={isRegistering || showResendVerification || showForgotPassword}
-                placeholder={showResendVerification && !isRegistering ? 'Enter your email to resend verification' : ''}
+                required={isRegistering || showForgotPassword}
+                placeholder={showResendVerification && !isRegistering ? 'Leave blank to use username if needed' : ''}
                 autoComplete="email"
                 disabled={isSubmitting}
               />
