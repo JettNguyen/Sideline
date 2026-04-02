@@ -1,5 +1,4 @@
 const nodemailer = require('nodemailer');
-const EMAIL_LOGO_URL = 'https://jettnguyen.github.io/Sideline/logo192.png';
 
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -18,15 +17,6 @@ transporter.verify().catch(() => {
 const sendVerificationEmail = async ({ to, username, verificationUrl }) => {
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-            <div style="text-align: center; margin: 0 0 16px;">
-                <img
-                    src="${EMAIL_LOGO_URL}"
-                    alt="Sideline"
-                    width="72"
-                    height="72"
-                    style="display: inline-block; border-radius: 12px;"
-                />
-            </div>
             <h2>Verify your Sideline account</h2>
             <p>Hi ${username},</p>
             <p>Thanks for creating your account! Please verify your email by clicking the button below:</p>
@@ -63,15 +53,6 @@ const sendVerificationEmail = async ({ to, username, verificationUrl }) => {
 const sendPasswordResetEmail = async ({ to, username, resetUrl }) => {
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-            <div style="text-align: center; margin: 0 0 16px;">
-                <img
-                    src="${EMAIL_LOGO_URL}"
-                    alt="Sideline"
-                    width="72"
-                    height="72"
-                    style="display: inline-block; border-radius: 12px;"
-                />
-            </div>
             <h2>Reset your Sideline password</h2>
             <p>Hi ${username},</p>
             <p>We received a request to reset your password. Click the button below to set a new password:</p>
