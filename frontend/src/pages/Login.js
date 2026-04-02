@@ -199,7 +199,7 @@ useEffect(() => {
           {(!showForgotPassword || resetPasswordMode) && (
             <div className="form-group">
               <label htmlFor="username" className="form-label">
-                Username
+                {showResendVerification ? 'Username (optional)' : 'Username'}
                 {!isRegistering && !resetPasswordMode && (
                   <span className="form-label-suffix">or Email</span>
                 )}
@@ -211,7 +211,7 @@ useEffect(() => {
                   className="form-input"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  required
+                  required={!showResendVerification}
                   autoComplete="username"
                   disabled={isSubmitting}
                 />

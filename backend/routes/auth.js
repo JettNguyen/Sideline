@@ -123,18 +123,27 @@ router.post('/resend-verification', async (req, res) => {
         const email = req.body?.email?.trim().toLowerCase();
         const providedUsername = req.body?.username?.trim();
 
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
+        if (!email && !providedUsername) {
+            return res.status(400).json({ message: 'Email or username is required' });
         }
 
-        const user = await User.findOne({ email });
+        let user = null;
+
+        if (email) {
+            user = await User.findOne({ email });
+        }
+
+        if (!user && providedUsername) {
+            const escapedUsername = providedUsername.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            user = await User.findOne({ username: new RegExp(`^${escapedUsername}$`, 'i') });
+        }
 
         if (!user) {
-            return res.status(404).json({ message: 'No account found with that email' });
+            return res.status(404).json({ message: 'No account found with that email or username' });
         }
 
-        if (providedUsername && user.username !== providedUsername) {
-            return res.status(400).json({ message: 'Provided email does not match the entered username' });
+        if (email && providedUsername && user.email !== email) {
+            return res.status(400).json({ message: 'Provided email and username do not match the same account' });
         }
 
         if (user.isEmailVerified) {
