@@ -39,68 +39,6 @@
     transform: scale(0.95);
 }
 
-.teams-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.team-create-card {
-    background: var(--color-surface-2);
-    border-radius: 15px;
-    padding: 10px;
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-    filter: drop-shadow(3px 3px 5px var(--color-shadow-white));
-}
-
-.team-create-input {
-    flex: 1;
-    border: 2px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-surface-3);
-    color: var(--color-text);
-    padding: 8px 10px;
-    outline: none;
-}
-
-.team-create-input:focus {
-    border-color: var(--color-accent-strong);
-}
-
-.team-create-btn {
-    border: none;
-    border-radius: 10px;
-    background: var(--color-accent);
-    color: var(--color-text);
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-}
-
-.team-create-btn:hover {
-    background: var(--color-accent-hover);
-}
-
-.team-create-btn:active {
-    transform: scale(0.97);
-}
-
-.home-error-text {
-    color: red;
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-}
-
-.home-success-text {
-    color: #2a9d4b;
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-}
-
 .invite-notification-card {
     background: var(--color-surface-2);
     border-radius: 15px;
@@ -111,7 +49,30 @@
 
 .invite-notification-title {
     margin: 0 0 10px;
+    font-size: 18px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.invite-notification-title i {
+    color: var(--color-accent-secondary);
     font-size: 16px;
+}
+
+.invite-notification-count {
+    margin-left: auto;
+    min-width: 25px;
+    height: 25px;
+    padding: 0 5px;
+    border-radius: 25px;
+    background: var(--color-accent-secondary);
+    color: var(--color-text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
 }
 
 .invite-notification-row {
@@ -125,11 +86,117 @@
 
 .invite-notification-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+}
+
+.invite-notification-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.invite-notification-sub {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.invite-accept-btn {
+    border: none;
+    border-radius: 10px;
+    min-height: 40px;
+    min-width: 60px;
+    background: var(--color-accent);
+    font-size: 14px;
+    color: var(--color-text);
+    padding: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.invite-accept-btn:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.invite-accept-btn:active {
+    transform: scale(0.95);
 }
 
 .invite-decline-btn {
+    border: none;
+    border-radius: 10px;
+    min-height: 40px;
+    min-width: 60px;
     background: var(--color-surface-3);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    padding: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.invite-decline-btn:hover {
+    background: var(--color-divider);
+    color: var(--color-text);
+}
+
+.invite-decline-btn:active {
+    transform: scale(0.95);
+}
+
+.team-create-card {
+    background: var(--color-surface-2);
+    border-radius: 15px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    filter: drop-shadow(0 0 5px var(--color-shadow-white));
+}
+
+.team-create-input {
+    flex: 1;
+    min-height: 40px;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface-3);
+    font-size: 16px;
+    color: var(--color-text);
+    padding: 10px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.team-create-input:focus {
+    border-color: var(--color-accent-strong);
+}
+
+.team-create-btn {
+    border: none;
+    border-radius: 10px;
+    background: var(--color-accent);
+    font-size: 16px;
+    color: var(--color-text);
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+}
+
+.team-create-btn:hover {
+    background: var(--color-accent-hover);
+}
+
+.team-create-btn:active {
+    transform: scale(0.95);
+}
+
+.teams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .team-action-tabs {
@@ -142,7 +209,7 @@
     background: var(--color-surface-2);
     border-radius: 15px;
     overflow: hidden;
-    filter: drop-shadow(3px 3px 5px var(--color-shadow-white));
+    box-shadow: 3px 3px 5px var(--color-shadow-white);
 }
 
 .team-card-header {
@@ -152,7 +219,6 @@
     padding: 15px;
     text-decoration: none;
     color: var(--color-text);
-    filter: drop-shadow(0 0 10px var(--color-shadow-strong));
     background: var(--color-accent);
     transition: background-color 0.2s;
 }
@@ -169,22 +235,24 @@
     background: var(--color-accent-hover);
 }
 
+.team-card-header:active {
+    background: var(--color-accent);
+}
+
 .team-card-header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 500;
-    filter: drop-shadow(0 0 5px var(--color-shadow-strong));
 }
 
 .team-card-header i {
     color: var(--color-text);
     font-size: 14px;
-    filter: drop-shadow(0 0 5px var(--color-shadow-strong));
 }
 
 .notification-badge {
-    min-width: 24px;
-    height: 24px;
+    min-width: 25px;
+    height: 25px;
     padding: 0 7px;
     border-radius: 999px;
     background: var(--color-accent-secondary);
@@ -217,6 +285,10 @@
     background: var(--color-surface-3);
 }
 
+.recent-game:active {
+    background: var(--color-divider);
+}
+
 .recent-game .opponent {
     font-size: 14px;
 }
@@ -235,7 +307,7 @@
 .no-games {
     text-align: center;
     color: var(--color-text-muted);
-    font-size: 14px;
+    font-size: 18px;
     padding: 15px;
     margin: 0;
 }
@@ -243,7 +315,7 @@
 .no-teams {
     text-align: center;
     color: var(--color-text);
-    font-size: 14px;
+    font-size: 18px;
     padding: 10px;
     margin: 0;
 }
@@ -292,9 +364,13 @@
     background: var(--color-surface-2);
 }
 
+.feed-header:active {
+    background: var(--color-surface-3);
+}
+
 .feed-header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 500;
     letter-spacing: 1px;
     filter: none;
@@ -305,8 +381,8 @@
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 260ms ease, opacity 240ms ease, transform 240ms ease;
-    transform: translateY(-6px);
+    transition: max-height 0.5s ease, opacity 0.25s ease, transform 0.25s ease;
+    transform: translateY(-5px);
 }
 
 .feed-content.open {
@@ -334,21 +410,33 @@
     border-color: var(--color-border);
 }
 
-.feed-main {
-    margin: 0;
-    font-size: 14px;
+.feed-item:active {
+    background: var(--color-surface-3);
 }
 
-.feed-sub {
-    margin: 4px 0 0;
-    color: var(--color-text-muted);
-    font-size: 12px;
+.feed-main {
+    margin: 0;
+    font-size: 16px;
 }
 
 .feed-date {
     color: var(--color-text-muted);
     font-size: 12px;
     white-space: nowrap;
+}
+
+.home-error-text {
+    color: var(--color-error);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.home-success-text {
+    color: var(--color-success);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
 }
 
 @media (min-width: 500px) {
@@ -359,11 +447,11 @@
     }
 
     .team-card-header h2 {
-        font-size: 20px;
+        font-size: 24px;
     }
 
     .feed-header h2 {
-        font-size: 20px;
+        font-size: 24px;
     }
 
     .recent-game {

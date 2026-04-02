@@ -9,29 +9,18 @@ const router = express.Router();
 
 const VERIFICATION_TOKEN_HOURS = 24;
 
-const makeVerificationToken = () => crypto.randomBytes(32).toString('hex');
+const makeToken = () => crypto.randomBytes(32).toString('hex');
 const hashToken = (token) =>
     crypto.createHash('sha256').update(token).digest('hex');
 
-const buildVerificationUrl = (token) => {
+const buildTokenUrl = (token, param) => {
     const clientBase =
         process.env.CLIENT_APP_URL ||
         process.env.CLIENT_ORIGIN?.split(',')[0]?.trim() ||
         'http://localhost:3000';
 
-    return `${clientBase}/#/login?verifyToken=${token}`;
+    return `${clientBase}/#/login?${param}=${token}`;
 };
-
-const buildResetUrl = (token) => {
-    const clientBase =
-        process.env.CLIENT_APP_URL ||
-        process.env.CLIENT_ORIGIN?.split(',')[0]?.trim() ||
-        'http://localhost:3000';
-
-    return `${clientBase}/#/login?resetToken=${token}`;
-};
-
-const makeResetToken = () => crypto.randomBytes(32).toString('hex');
 
 
 
@@ -47,7 +36,8 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const existingUsername = await User.findOne({ username });
+        const escapedUsername = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const existingUsername = await User.findOne({ username: new RegExp(`^${escapedUsername}$`, 'i') });
         if(existingUsername) {
             return res.status(409).json({ message: 'Username already in use' });
         }
@@ -59,7 +49,7 @@ router.post('/register', async (req, res) => {
 
         const passwordHash = await bcrypt.hash(password, 10);
 
-        const rawToken = makeVerificationToken();
+        const rawToken = makeToken();
         const tokenHash = hashToken(rawToken);
         const expires = new Date(Date.now() + VERIFICATION_TOKEN_HOURS * 60 * 60 * 1000);
 
@@ -72,7 +62,7 @@ router.post('/register', async (req, res) => {
             emailVerificationExpires: expires,
         });
 
-        const verificationUrl = buildVerificationUrl(rawToken);
+        const verificationUrl = buildTokenUrl(rawToken, 'verifyToken');
 
         await sendVerificationEmail({
             to: user.email,
@@ -147,7 +137,7 @@ router.post('/resend-verification', async (req, res) => {
             return res.status(400).json({ message: 'Email is already verified' });
         }
 
-        const rawToken = makeVerificationToken();
+        const rawToken = makeToken();
         const tokenHash = hashToken(rawToken);
         const expires = new Date(Date.now() + VERIFICATION_TOKEN_HOURS * 60 * 60 * 1000);
 
@@ -155,7 +145,7 @@ router.post('/resend-verification', async (req, res) => {
         user.emailVerificationExpires = expires;
         await user.save();
 
-        const verificationUrl = buildVerificationUrl(rawToken);
+        const verificationUrl = buildTokenUrl(rawToken, 'verifyToken');
 
         await sendVerificationEmail({
             to: user.email,
@@ -184,7 +174,7 @@ router.post('/request-password-reset', async (req, res) => {
             return res.status(404).json({ message: 'No account found with that email' });
         }
 
-        const rawToken = makeResetToken();
+        const rawToken = makeToken();
         const tokenHash = hashToken(rawToken);
         const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
 
@@ -192,7 +182,7 @@ router.post('/request-password-reset', async (req, res) => {
         user.passwordResetExpires = expires;
         await user.save();
 
-        const resetUrl = buildResetUrl(rawToken);
+        const resetUrl = buildTokenUrl(rawToken, 'resetToken');
 
         await sendPasswordResetEmail({ to: user.email, username: user.username, resetUrl });
 
@@ -245,9 +235,10 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Missing username/email or password' });
         }
 
+        const escaped = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const query = {
             $or: [
-                { username: identifier },
+                { username: new RegExp(`^${escaped}$`, 'i') },
                 { email: identifier.toLowerCase() }
             ]
         };

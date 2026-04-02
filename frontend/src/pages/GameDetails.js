@@ -4,7 +4,6 @@ import Modal from '../components/Modal';
 import VideoUploader from '../components/VideoUploader';
 import api from '../utils/api';
 import { formatLongDate } from '../utils/date';
-import { markMatchViewed } from '../utils/viewedMatches';
 import './GameDetails.css';
 
 const formatSeconds = (seconds) => {
@@ -15,6 +14,9 @@ const formatSeconds = (seconds) => {
 };
 
 const toValidDuration = (value) => (Number.isFinite(value) && value > 0 ? value : 0);
+
+const filterToClips = (prev, clips) =>
+  Object.fromEntries(clips.filter((c) => prev[c._id]).map((c) => [c._id, prev[c._id]]));
 
 const GameDetails = () => {
   const { gameId } = useParams();
@@ -47,7 +49,6 @@ const GameDetails = () => {
       try {
         const res = await api.get(`/matches/${gameId}`);
         const match = res.data;
-        markMatchViewed(match._id);
         setGame({
           id: match._id,
           teamName: match.team?.name || 'Team',
@@ -75,24 +76,8 @@ const GameDetails = () => {
       const nextClips = res.data || [];
 
       setClips(nextClips);
-      setClipPreviewUrls((prev) => {
-        const next = {};
-        nextClips.forEach((clip) => {
-          if (prev[clip._id]) {
-            next[clip._id] = prev[clip._id];
-          }
-        });
-        return next;
-      });
-      setClipDurations((prev) => {
-        const next = {};
-        nextClips.forEach((clip) => {
-          if (prev[clip._id]) {
-            next[clip._id] = prev[clip._id];
-          }
-        });
-        return next;
-      });
+      setClipPreviewUrls((prev) => filterToClips(prev, nextClips));
+      setClipDurations((prev) => filterToClips(prev, nextClips));
       setCurrentClip((prevIndex) => {
         if (!nextClips.length) {
           return 0;
@@ -159,10 +144,6 @@ const GameDetails = () => {
       cancelled = true;
     };
   }, [clips, clipPreviewUrls]);
-
-  const formatDate = (dateStr) => {
-    return formatLongDate(dateStr);
-  };
 
   const quickTags = ['Goal', 'Save', 'Great play'];
 
@@ -340,7 +321,7 @@ const GameDetails = () => {
           <span>{game.opponent}</span>
         </h1>
         <p>Total clips: {clips.length}</p>
-        <p className="matchup-date">{formatDate(game.date)}</p>
+        <p className="matchup-date">{formatLongDate(game.date)}</p>
       </div>
 
       {clips.length === 0 ? (
@@ -410,14 +391,15 @@ const GameDetails = () => {
 
           <div className="moment-tags">
         {quickTags.map((label) => (
-          <button 
-            key={label} 
+          <button
+            key={label}
             className={`tag-chip ${selectedTag === label ? 'selected' : ''}`}
             onClick={() => setSelectedTag(selectedTag === label ? null : label)}
           >
             {label}
           </button>
         ))}
+        <p className="tag-hint">Select a tag, then use "Tag at …" to mark the current moment.</p>
       </div>
 
       <div className="moment-log-section">
@@ -444,7 +426,6 @@ const GameDetails = () => {
                   title="Remove tagged moment"
                 >
                   <i className="fas fa-trash-alt"></i>
-                  <span>Remove</span>
                 </button>
               </div>
             ))}
@@ -509,7 +490,7 @@ const GameDetails = () => {
           setShowUploadModal(false);
           await handleUploadComplete();
         }}
-        title="Upload from device"
+        title="Upload Video"
       >
         <div className="game-upload-panel">
           <VideoUploader onUploadSuccess={handleUploadComplete} matchId={gameId} />
@@ -522,10 +503,10 @@ const GameDetails = () => {
           onClick={() => setShowUploadModal(true)}
         >
           <i className="fas fa-cloud-upload-alt"></i>
-          Upload from device
+          Upload Video
         </button>
-        <button 
-          className={`bar-btn primary ${!selectedTag ? 'disabled' : ''}`}
+        <button
+          className={`bar-btn primary ${!selectedTag || !videoUrl ? 'disabled' : ''}`}
           onClick={handleAddTagMoment}
           disabled={!selectedTag || !videoUrl}
         >

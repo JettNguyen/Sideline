@@ -5,12 +5,6 @@
     flex-direction: column;
 }
 
-.profile-section h2 {
-    font-size: 18px;
-    letter-spacing: 1px;
-    margin: 0;
-}
-
 .section-head {
     display: flex;
     align-items: center;
@@ -18,6 +12,18 @@
     margin-bottom: 5px;
     margin-left: 5px;
     filter: drop-shadow(0px 0px 5px var(--color-shadow));
+}
+
+.profile-section h2 {
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.subheading {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin: 5px 0;
 }
 
 .card {
@@ -53,7 +59,7 @@
 }
 
 .label {
-    font-size: 16px;
+    font-size: 20px;
     margin: 0;
     color: var(--color-text);
 }
@@ -64,21 +70,24 @@
     margin: 5px 0 0 0;
 }
 
-.profile-error-text {
-    color: #d02222;
-    margin: 0 0 10px;
-    font-size: 14px;
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 10px 0 0 0;
 }
 
 .pill-btn {
     border: none;
+    min-height: 40px;
     background: var(--color-accent);
     color: var(--color-text);
     padding: 10px;
     border-radius: 50px;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
-    min-width: 74px;
+    min-width: 75px;
     transition: background-color 0.2s, transform 0.2s;
 }
 
@@ -93,7 +102,7 @@
 }
 
 .pill-btn.ghost:hover {
-    background: rgba(43, 139, 240, 0.2);
+    background: rgba(43, 139, 240, 0.25);
     border-color: var(--color-accent-secondary-hover);
     color: var(--color-accent-secondary-hover);
 }
@@ -102,42 +111,16 @@
     transform: scale(0.95);
 }
 
-.signout-btn {
-    width: 100%;
-    border: none;
-    background: var(--color-accent);
-    color: var(--color-text);
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    margin-top: 10px;
-    filter: drop-shadow(5px 5px 5px var(--color-shadow));
-}
-
-.signout-btn:hover {
-    background: #d02222;
-}
-
-.signout-btn:active {
-    transform: scale(0.95);
-}
-
-.subheading {
-    font-size: 14px;
-    color: var(--color-text-muted);
-    margin: 5px 0;
-}
-
 .full-btn {
     width: 100%;
+    min-height: 40px;
     border: none;
     background: var(--color-accent-secondary);
     color: var(--color-text);
     padding: 10px;
+    margin-top: 10px;
     border-radius: 10px;
-    font-size: 15px;
+    font-size: 18px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.2s;
 }
@@ -150,22 +133,39 @@
     transform: scale(0.95);
 }
 
+.signout-btn {
+    width: 100%;
+    min-height: 50px;
+    border: none;
+    background: var(--color-accent);
+    color: var(--color-text);
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 22px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    margin-top: 10px;
+    filter: drop-shadow(5px 5px 5px var(--color-shadow));
+}
+
+.signout-btn:hover {
+    background: var(--color-error);
+}
+
+.signout-btn:active {
+    transform: scale(0.95);
+}
+
+.profile-error-text {
+    color: var(--color-error);
+    margin: 0 0 10px;
+    font-size: 14px;
+}
+
 @media (min-width: 500px) {
     .profile-container {
         max-width: 640px;
         margin: 0 auto;
         padding: 20px;
     }
-
-    .card {
-        padding: 15px;
-    }
-}
-
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin:10px;
 }

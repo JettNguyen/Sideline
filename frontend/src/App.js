@@ -66,30 +66,32 @@ function AppContent() {
     <div className="App">
       {showHeader && (
         <header className={`app-header ${showBackButton ? 'has-back' : 'no-back'}`}>
-          {showBackButton && (
-            <button className="header-back-btn" onClick={() => navigate(-1)}>
-              <i className="fas fa-arrow-left"></i>
-            </button>
-          )}
-          <div className={`brand-container ${showBackButton ? 'center' : 'left'}`}>
-            <Link to="/" className="brand-mark">
-              <img src={logo} alt="Sideline" className="brand-logo" />
-              <span className="brand-text">Sideline</span>
-            </Link>
+          <div className="header-inner">
+            {showBackButton && (
+              <button className="header-back-btn" onClick={() => navigate(-1)}>
+                <i className="fas fa-arrow-left"></i>
+              </button>
+            )}
+            <div className={`brand-container ${showBackButton ? 'center' : 'left'}`}>
+              <Link to="/" className="brand-mark">
+                <img src={logo} alt="Sideline" className="brand-logo" />
+                <span className="brand-text">Sideline</span>
+              </Link>
+            </div>
+            {showProfileButton && user && (
+              <Link to="/profile" className="header-profile-btn" aria-label="Profile">
+                {user?.profilePicture && profilePicUrl ? (
+                  <img
+                    src={profilePicUrl}
+                    alt="Profile"
+                    className="header-profile-pic"
+                  />
+                ) : (
+                  <i className="fas fa-user"></i>
+                )}
+              </Link>
+            )}
           </div>
-          {showProfileButton && user && (
-            <Link to="/profile" className="header-profile-btn" aria-label="Profile">
-              {user?.profilePicture && profilePicUrl ? (
-                <img
-                  src={profilePicUrl}
-                  alt="Profile"
-                  className="header-profile-pic"
-                />
-              ) : (
-                <i className="fas fa-user"></i>
-              )}
-            </Link>
-          )}
         </header>
       )}
 

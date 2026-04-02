@@ -1,6 +1,5 @@
 .team-page {
     padding: 15px;
-    min-height: 100vh;
 }
 
 .team-header {
@@ -14,12 +13,13 @@
 .team-header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .team-name {
     flex: 1;
-    font-size: clamp(24px, 6vw, 32px);
+    font-size: clamp(32px, 6vw, 40px);
+    letter-spacing: 2px;
     margin: 0;
     filter: drop-shadow(0px 0px 5px var(--color-shadow-strong));
 }
@@ -32,8 +32,7 @@
     color: var(--color-text);
     font-size: 20px;
     cursor: pointer;
-    padding: 5px;
-    padding-bottom: 0;
+    padding: 5px 5px 0;
     border-radius: 10px;
     transition: background-color 0.2s, transform 0.2s;
     filter: drop-shadow(0px 0px 3px var(--color-shadow-white));
@@ -48,20 +47,19 @@
 }
 
 .delete-team-btn {
-    height: 35px;
     border: none;
     border-radius: 10px;
-    margin-top: 4px;
-    padding: 10px 10px;
-    background: #c0392b;
-    color: #fff;
-    font-size: 14px;
+    height: 45px;
+    padding: 10px;
+    background: var(--color-error);
+    color: var(--color-text);
+    font-size: 16px;
     cursor: pointer;
     transition: background-color 0.2s, transform 0.2s;
 }
 
 .delete-team-btn:hover:not(:disabled) {
-    background: #a93226;
+    background: var(--color-error-hover);
 }
 
 .delete-team-btn:active:not(:disabled) {
@@ -88,10 +86,10 @@
     padding: 5px;
     background: var(--color-divider);
     border: 2px dashed var(--color-border);
-    border-radius: 12px;
+    border-radius: 10px;
     color: var(--color-text-muted);
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
     filter: drop-shadow(0 0 5px var(--color-shadow));
 }
 
@@ -100,12 +98,16 @@
     color: var(--color-accent-hover);
 }
 
+.add-game-card:active {
+    transform: scale(0.95);
+}
+
 .add-game-card i {
     font-size: 20px;
 }
 
 .add-game-card span {
-    font-size: 12px;
+    font-size: 18px;
 }
 
 .month-group {
@@ -140,6 +142,10 @@
     background: var(--color-surface-3);
 }
 
+.game-card:active {
+    transform: scale(0.95);
+}
+
 .game-info {
     display: flex;
     flex-direction: column;
@@ -147,7 +153,8 @@
 }
 
 .game-opponent {
-    font-size: 16px;
+    font-size: 20px;
+    letter-spacing: 1px;
     font-weight: 500;
 }
 
@@ -169,14 +176,24 @@
 
 .invite-tab {
     flex: 1;
+    min-height: 40px;
     padding: 5px;
     background: var(--color-surface-3);
     border: none;
     border-radius: 10px;
     color: var(--color-text-muted);
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s, color 0.2s;
+    font-size: 18px;
+    transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+.invite-tab:not(.active):hover {
+    background: var(--color-divider);
+    color: var(--color-text);
+}
+
+.invite-tab:active {
+    transform: scale(0.95);
 }
 
 .invite-tab.active {
@@ -190,8 +207,99 @@
     flex-direction: column;
 }
 
+.user-search-wrap {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.user-search-wrap .modal-input {
+    margin-bottom: 0;
+}
+
+.user-search-dropdown {
+    background: var(--color-surface-3);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 4px;
+    margin: 4px 0 0;
+    list-style: none;
+    overflow: hidden;
+    animation: dropdownIn 0.15s ease;
+}
+
+@keyframes dropdownIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.user-search-result {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--color-text);
+    transition: background-color 0.15s;
+}
+
+.user-search-result:hover {
+    background: var(--color-surface-2);
+}
+
+.user-search-result i {
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.user-search-hint {
+    margin: 6px 4px 0;
+    font-size: 12px;
+    color: var(--color-text-muted);
+}
+
+.invite-code-label {
+    margin-bottom: 5px;
+    color: var(--color-text-muted);
+    font-size: 14px;
+}
+
+.game-hint {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-bottom: 15px;
+}
+
+.game-hint i {
+    margin-right: 5px;
+    font-size: 10px;
+}
+
+.team-qr-image {
+    width: 180px;
+    height: 180px;
+    margin: 10px auto;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--color-text);
+}
+
+.team-link-text {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin: 10px 0;
+    word-break: break-all;
+}
+
 .team-error-text {
-    color: red;
+    color: var(--color-error);
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.team-success-text {
+    color: var(--color-success);
     margin-bottom: 10px;
     font-size: 14px;
 }
@@ -199,28 +307,6 @@
 .team-loading-text {
     color: var(--color-text-muted);
     margin: 5px 0 10px;
-}
-
-.team-success-text {
-    color: #2a9d4b;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.team-qr-image {
-    width: 180px;
-    height: 180px;
-    margin: 8px auto;
-    border-radius: 8px;
-    border: 1px solid var(--color-border);
-    background: #fff;
-}
-
-.team-link-text {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    margin: 8px 0;
-    word-break: break-all;
 }
 
 @media (min-width: 500px) {
@@ -244,7 +330,7 @@
 }
 
 @media (min-width: 800px) {
-  .team-page {
-    max-width: 700px;
-  }
+    .team-page {
+        max-width: 700px;
+    }
 }

@@ -1,5 +1,7 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const User = require('../models/User');
+const TeamMembership = require('../models/TeamMembership');
 const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -79,6 +81,42 @@ router.patch('/me', auth, async (req, res) => {
         console.error('Update me error:', err);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+// GET /api/users/search?q=<query>&teamId=<teamId>
+router.get('/search', auth, async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+    const teamId = req.query.teamId?.trim();
+
+    if (!q || q.length < 2) {
+      return res.json([]);
+    }
+
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+
+    let users = await User.find({
+      _id: { $ne: req.user.id },
+      $or: [{ username: regex }, { email: regex }],
+    })
+      .select('_id username')
+      .limit(10);
+
+    if (teamId && mongoose.Types.ObjectId.isValid(teamId)) {
+      const taken = await TeamMembership.find({
+        team: teamId,
+        status: { $in: ['active', 'invited'] },
+      }).select('user');
+      const takenSet = new Set(taken.map((m) => m.user.toString()));
+      users = users.filter((u) => !takenSet.has(u._id.toString()));
+    }
+
+    return res.json(users.slice(0, 5));
+  } catch (err) {
+    console.error('User search error:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;

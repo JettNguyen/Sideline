@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import Modal from '../components/Modal';
 import api from '../utils/api';
@@ -11,7 +11,13 @@ const Team = () => {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showAddGameModal, setShowAddGameModal] = useState(false);
   const [inviteTab, setInviteTab] = useState('search');
+  const [isSwitchingTab, setIsSwitchingTab] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchInputRef = useRef(null);
+  const justSelectedRef = useRef(false);
   const [gameDate, setGameDate] = useState('');
   const [opponent, setOpponent] = useState('');
   const [gameError, setGameError] = useState('');
@@ -20,6 +26,7 @@ const Team = () => {
   const [pageError, setPageError] = useState('');
   const [loading, setLoading] = useState(true);
   const [isDeletingTeam, setIsDeletingTeam] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [team, setTeam] = useState(null);
   const [games, setGames] = useState([]);
   const isOwner = (team?.membershipRole || '').toLowerCase() === 'owner';
@@ -105,6 +112,49 @@ const Team = () => {
       });
   };
 
+  useEffect(() => {
+    const q = searchQuery.trim();
+
+    if (justSelectedRef.current) {
+      justSelectedRef.current = false;
+      return;
+    }
+
+    if (q.length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await api.get('/users/search', { params: { q, teamId } });
+        setSearchResults(res.data || []);
+        setShowDropdown(true);
+      } catch (err) {
+        console.error('User search error:', err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      setIsSearching(false);
+    };
+  }, [searchQuery, teamId]);
+
+  const switchInviteTab = (tab) => {
+    if (tab === inviteTab || isSwitchingTab) return;
+    setIsSwitchingTab(true);
+    setTimeout(() => {
+      setInviteTab(tab);
+      setIsSwitchingTab(false);
+    }, 150);
+  };
+
   const handleInviteSearch = () => {
     const username = searchQuery.trim();
     if (!username) {
@@ -118,6 +168,8 @@ const Team = () => {
         setInviteSuccess('Invite sent successfully.');
         setInviteError('');
         setSearchQuery('');
+        setSearchResults([]);
+        setShowDropdown(false);
       })
       .catch((err) => {
         console.error('Send invite error:', err);
@@ -138,7 +190,19 @@ const Team = () => {
     }
 
     try {
-      await navigator.clipboard.writeText(inviteCode);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(inviteCode);
+      } else {
+        // Fallback for HTTP (local dev) and older iOS Safari
+        const textarea = document.createElement('textarea');
+        textarea.value = inviteCode;
+        textarea.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       setInviteSuccess('Invite code copied.');
       setInviteError('');
     } catch (err) {
@@ -152,16 +216,12 @@ const Team = () => {
     return formatShortDate(dateStr);
   };
 
-  const handleDeleteTeam = async () => {
-    if (!team || !isOwner) {
-      return;
-    }
+  const handleDeleteTeam = () => {
+    if (!team || !isOwner) return;
+    setShowDeleteConfirmModal(true);
+  };
 
-    const confirmed = window.confirm('Delete this team permanently? This will remove matches, kids, and memberships.');
-    if (!confirmed) {
-      return;
-    }
-
+  const confirmDeleteTeam = async () => {
     try {
       setIsDeletingTeam(true);
       await api.delete(`/teams/${teamId}`);
@@ -169,6 +229,7 @@ const Team = () => {
     } catch (err) {
       console.error('Delete team error:', err);
       setPageError(err.response?.data?.message || 'Could not delete team.');
+      setShowDeleteConfirmModal(false);
     } finally {
       setIsDeletingTeam(false);
     }
@@ -240,70 +301,96 @@ const Team = () => {
           setInviteError('');
           setInviteSuccess('');
           setSearchQuery('');
+          setSearchResults([]);
+          setShowDropdown(false);
         }}
         title="Invite to Team"
       >
         <div className="invite-tabs">
           <button
             className={`invite-tab ${inviteTab === 'search' ? 'active' : ''}`}
-            onClick={() => setInviteTab('search')}
+            onClick={() => switchInviteTab('search')}
           >
             Search User
           </button>
           <button
             className={`invite-tab ${inviteTab === 'code' ? 'active' : ''}`}
-            onClick={() => setInviteTab('code')}
+            onClick={() => switchInviteTab('code')}
           >
             Invite Code
           </button>
         </div>
 
-        {inviteTab === 'search' ? (
-          <div className="invite-search">
-            <label className="modal-label">Username</label>
-            <input
-              type="text"
-              className="modal-input"
-              placeholder="Enter username..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (inviteError) {
-                  setInviteError('');
-                }
-                if (inviteSuccess) {
-                  setInviteSuccess('');
-                }
-              }}
-            />
-            <button className="modal-btn modal-btn-primary" onClick={handleInviteSearch}>
-              Send Invite
-            </button>
-            {inviteError && <p className="team-error-text">{inviteError}</p>}
-            {inviteSuccess && <p className="team-success-text">{inviteSuccess}</p>}
-          </div>
-        ) : (
-          <div className="invite-code-section">
-            <div className="invite-code-box">
-              <p style={{ marginBottom: '5px', color: '#aaa', fontSize: '12px' }}>Share this code</p>
-              <span className="invite-code">{team?.inviteCode || 'N/A'}</span>
+        <div className={`invite-panel${isSwitchingTab ? ' switching' : ''}`}>
+          {inviteTab === 'search' ? (
+            <div className="invite-search">
+              <label className="modal-label">Username or email</label>
+              <div className="user-search-wrap">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  className="modal-input"
+                  placeholder="Search by username or email..."
+                  value={searchQuery}
+                  autoComplete="off"
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (inviteError) setInviteError('');
+                    if (inviteSuccess) setInviteSuccess('');
+                  }}
+                />
+                {showDropdown && searchResults.length > 0 && (
+                  <ul className="user-search-dropdown">
+                    {searchResults.map((user) => (
+                      <li
+                        key={user._id}
+                        className="user-search-result"
+                        onClick={() => {
+                          justSelectedRef.current = true;
+                          setSearchQuery(user.username);
+                          setShowDropdown(false);
+                          searchInputRef.current?.blur();
+                        }}
+                      >
+                        <i className="fas fa-user"></i>
+                        {user.username}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {searchQuery.trim().length >= 2 && !isSearching && searchResults.length === 0 && (
+                  <p className="user-search-hint">No users found</p>
+                )}
+              </div>
+              <button className="modal-btn modal-btn-primary" onClick={handleInviteSearch}>
+                Send Invite
+              </button>
+              {inviteError && <p className="team-error-text">{inviteError}</p>}
+              {inviteSuccess && <p className="team-success-text">{inviteSuccess}</p>}
             </div>
+          ) : (
+            <div className="invite-code-section">
+              <div className="invite-code-box">
+                <p className="invite-code-label">Share this code</p>
+                <span className="invite-code">{team?.inviteCode || 'N/A'}</span>
+              </div>
 
-            {qrImageUrl ? (
-              <img src={qrImageUrl} alt="Team invite QR code" className="team-qr-image" />
-            ) : (
-              <div className="qr-placeholder">QR Code</div>
-            )}
+              {qrImageUrl ? (
+                <img src={qrImageUrl} alt="Team invite QR code" className="team-qr-image" />
+              ) : (
+                <div className="qr-placeholder">QR Code</div>
+              )}
 
-            <button className="modal-btn modal-btn-secondary" onClick={handleCopyInviteCode}>
-              <i className="fas fa-copy" style={{ marginRight: '8px' }}></i>
-              Copy Code
-            </button>
-            {inviteLink && <p className="team-link-text">Join link: {inviteLink}</p>}
-            {inviteError && <p className="team-error-text">{inviteError}</p>}
-            {inviteSuccess && <p className="team-success-text">{inviteSuccess}</p>}
-          </div>
-        )}
+              <button className="modal-btn modal-btn-secondary" onClick={handleCopyInviteCode}>
+                <i className="fas fa-copy"></i>
+                Copy Code
+              </button>
+              {inviteLink && <p className="team-link-text">Join link: {inviteLink}</p>}
+              {inviteError && <p className="team-error-text">{inviteError}</p>}
+              {inviteSuccess && <p className="team-success-text">{inviteSuccess}</p>}
+            </div>
+          )}
+        </div>
       </Modal>
 
       <Modal
@@ -343,8 +430,8 @@ const Team = () => {
 
         {gameError && <p className="team-error-text">{gameError}</p>}
 
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: '15px' }}>
-          <i className="fas fa-info-circle" style={{ marginRight: '5px', fontSize: '10px' }}></i>
+        <p className="game-hint">
+          <i className="fas fa-info-circle"></i>
           You can upload footage after creating the game
         </p>
 
@@ -354,6 +441,37 @@ const Team = () => {
         >
           Create Game
         </button>
+      </Modal>
+
+      <Modal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => setShowDeleteConfirmModal(false)}
+        title="Delete Team"
+      >
+        <div className="confirm-dialog">
+          <div className="confirm-icon danger">
+            <i className="fas fa-triangle-exclamation"></i>
+          </div>
+          <p className="confirm-message">
+            This will permanently delete <strong>{team?.name}</strong> and remove all matches, clips, and memberships.
+          </p>
+          <div className="confirm-actions">
+            <button
+              className="modal-btn modal-btn-cancel"
+              onClick={() => setShowDeleteConfirmModal(false)}
+              disabled={isDeletingTeam}
+            >
+              Cancel
+            </button>
+            <button
+              className="modal-btn modal-btn-danger"
+              onClick={confirmDeleteTeam}
+              disabled={isDeletingTeam}
+            >
+              {isDeletingTeam ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

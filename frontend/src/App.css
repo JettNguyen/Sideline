@@ -1,8 +1,13 @@
 :root {
   --color-bg: #0b150b;
   --color-bg-soft: rgba(11, 21, 11, 0.1);
-  --color-stripe-1: #3f8f3f;
-  --color-stripe-2: #2f602f;
+  --color-stripe-1: #2f7f2f;
+  --color-stripe-2: #1f501f;
+
+  --color-error: #d01f1f;
+  --color-error-hover: #f02b2b;
+  --color-success: #2fe02f;
+  --color-success-hover: #2bf02b;
 
   --color-text: #f7f7f7;
   --color-text-muted: #b0b0b0;
@@ -27,10 +32,53 @@
   --color-shadow-white: rgba(255, 255, 255, 0.2);
 }
 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Jersey 10', sans-serif;
+}
+
+button, a, [role="button"], label[for] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* more readable font for these styles */
+input, textarea, select,
+.value, .subheading, .opponent, .game-date, .matchup-date, .date,
+.invite-notification-sub, .feed-main, .feed-date, .moment-log-time,
+.modal-label, .confirm-message, .form-label-suffix,
+.invite-code-label, .game-hint, .team-link-text,
+.clips-empty-text, .info-text,
+.image-upload-meta, .video-upload-meta, .tag-hint,
+.profile-error-text, .home-error-text, .home-success-text,
+.team-error-text, .team-success-text, .team-loading-text, .video-error-text {
+  font-family: 'Saira', sans-serif;
+}
+
+html, body, #root {
+  overscroll-behavior: none;
+  background-color: var(--color-bg);
+}
+
+h1 {
+  font-size: 36px;
+  color: var(--color-text);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 5px var(--color-shadow-strong));
+}
+
+p {
+  color: var(--color-text);
+}
+
 .App {
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--color-bg);
-  background-image: 
+  background-image:
     radial-gradient(ellipse at center, var(--color-bg-soft) 0%, var(--color-bg) 100%),
     repeating-linear-gradient(
       0deg,
@@ -39,34 +87,72 @@
       var(--color-stripe-2) 40px,
       var(--color-stripe-2) 80px
     );
-  background-attachment: fixed;
   color: var(--color-text);
 }
 
-html, body, #root {
-  background-color: var(--color-bg);
+/* iOS Safari ignores background-attachment: fixed on non-body elements and
+   causes scroll repaint jank. Only apply it on hover-capable (desktop) devices. */
+@media (hover: hover) {
+  .App {
+    background-attachment: fixed;
+  }
 }
 
+.container {
+  width: 100%;
+  padding: 0 20px calc(72px + env(safe-area-inset-bottom));
+  margin: 0 auto;
+}
+
+.protected-loading {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-text);
+  opacity: 0.9;
+}
 
 .app-header {
   position: sticky;
-  top: env(safe-area-inset-top);
+  top: 0;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.75);
+  padding-top: env(safe-area-inset-top);
+  position: relative;
+}
+
+.app-header::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -40px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header-inner {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px 15px 10px;
-  z-index: 100;
-  background-color: var(--color-shadow);
-  min-height: 56px;
+  height: 55px;
+  padding: 0 15px;
   overflow: hidden;
 }
 
 .brand-container {
   position: absolute;
-  left: 16px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
-  transition: left 250ms ease, transform 250ms ease;
+  transition: left 0.25s ease, transform 0.25s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -78,31 +164,8 @@ html, body, #root {
 }
 
 .brand-container.left {
-  left: 16px;
+  left: 20px;
   transform: translateY(-50%);
-}
-
-.header-back-btn,
-.header-profile-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  background: none;
-  border: none;
-  color: var(--color-text);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s, transform 0.2s;
-}
-
-
-.header-profile-btn {
-  right: 10px;
 }
 
 .app-header.has-back .brand-container {
@@ -111,58 +174,8 @@ html, body, #root {
 }
 
 .app-header.no-back .brand-container {
-  left: 16px;
+  left: 20px;
   transform: translateY(-50%);
-}
-
-
-.header-back-btn {
-  background: none;
-  border: none;
-  color: var(--color-text);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 5px;
-  left: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s, transform 0.2s;
-}
-
-.header-back-btn:hover {
-  color: var(--color-accent-secondary-hover);
-}
-
-.header-back-btn:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.header-profile-btn {
-  border: none;
-  color: var(--color-text);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s, transform 0.2s;
-}
-
-.header-profile-btn:hover {
-  color: var(--color-accent-secondary-hover);
-}
-
-.header-profile-btn:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-@media (hover: none) {
-  .header-back-btn:hover,
-  .header-profile-btn:hover {
-    color: var(--color-text);
-  }
 }
 
 .brand-mark {
@@ -185,33 +198,95 @@ html, body, #root {
   letter-spacing: 1px;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Jersey 10', sans-serif;
-}
-
-html, body {
-  overscroll-behavior: none;
-}
-
-h1 {
-  font-size: 32px;
+.header-back-btn,
+.header-profile-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: none;
+  border: none;
   color: var(--color-text);
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 5px var(--color-shadow-strong));
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
 }
 
-p {
-  color: var(--color-text);
+.header-back-btn {
+  left: 15px;
 }
 
-.container {
-  width: 100%;
-  padding: 0 0 calc(72px + env(safe-area-inset-bottom));
-  margin: 0 auto;
+.header-back-btn:hover {
+  color: var(--color-accent-secondary-hover);
+}
+
+.header-back-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.header-profile-btn {
+  right: 15px;
+}
+
+.header-profile-btn:hover {
+  color: var(--color-accent-secondary-hover);
+}
+
+.header-profile-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+@media (hover: none) {
+  .header-back-btn:hover,
+  .header-profile-btn:hover {
+    color: var(--color-text);
+  }
+}
+
+.header-profile-pic {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+.page-transition {
+  opacity: 1;
+  position: relative;
+  top: 0;
+  transition: opacity 0.25s ease, top 0.25s ease;
+}
+
+.page-transition.page-entering {
+  opacity: 0;
+  top: 25px;
+}
+
+.page-transition.page-exiting {
+  opacity: 0;
+  top: -25px;
+}
+
+.page-transition.page-entered {
+  opacity: 1;
+  top: 0;
+}
+
+select,
+.modal-select {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+select:focus,
+.modal-select:focus {
+  transform: scale(1.01);
+  box-shadow: 0 0 0 3px rgba(46, 139, 255, 0.35);
+  border-color: var(--color-accent-secondary);
 }
 
 @media (min-width: 500px) {
@@ -222,54 +297,4 @@ p {
   .container {
     padding: 20px;
   }
-}
-
-.header-profile-pic {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.page-transition {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 250ms ease, transform 250ms ease;
-}
-
-.page-transition.page-exiting {
-  opacity: 0;
-  transform: translateY(-25px);
-}
-
-.page-transition.page-entering {
-  opacity: 0;
-  transform: translateY(25px);
-}
-
-.page-transition.page-entered {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.protected-loading {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: var(--color-text);
-  opacity: 0.9;
-}
-
-select,
-.modal-select {
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
-}
-
-select:focus,
-.modal-select:focus {
-  transform: scale(1.01);
-  box-shadow: 0 0 0 3px rgba(46, 139, 255, 0.35);
-  border-color: var(--color-accent-secondary);
 }

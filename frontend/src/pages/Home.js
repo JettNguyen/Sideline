@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import Modal from '../components/Modal';
 import { formatShortDate } from '../utils/date';
-import { getViewedMatchIdSet } from '../utils/viewedMatches';
 import './Home.css';
 
 const Home = () => {
@@ -104,17 +103,6 @@ const Home = () => {
       .slice(0, 8);
   }, [recentGamesFeed]);
 
-  const viewedMatchIds = useMemo(() => getViewedMatchIdSet(), [matchesByTeam, teams]);
-
-  const recentGamesNotificationCount = useMemo(
-    () => recentGamesFeed.filter((game) => !viewedMatchIds.has(game.id)).length,
-    [recentGamesFeed, viewedMatchIds]
-  );
-
-  const upcomingMatchesNotificationCount = useMemo(
-    () => upcomingMatchesFeed.filter((match) => !viewedMatchIds.has(match.id)).length,
-    [upcomingMatchesFeed, viewedMatchIds]
-  );
 
   const handleCreateTeam = async () => {
     const name = newTeamName.trim();
@@ -196,22 +184,26 @@ const Home = () => {
 
       {invites.length > 0 && (
         <div className="invite-notification-card">
-          <h3 className="invite-notification-title">Team Invites</h3>
+          <h3 className="invite-notification-title">
+            <i className="fas fa-bell"></i>
+            Team Invites
+            <span className="invite-notification-count">{invites.length}</span>
+          </h3>
           {invites.map((invite) => (
             <div key={invite._id} className="invite-notification-row">
-              <div>
-                <p className="feed-main">{invite.team?.name || 'Team'} invited you</p>
-                <p className="feed-sub">Role: {invite.role}</p>
+              <div className="invite-notification-info">
+                <p className="feed-main">{invite.team?.name || 'Team'}</p>
+                <p className="invite-notification-sub">You've been invited to join</p>
               </div>
               <div className="invite-notification-actions">
                 <button
-                  className="team-create-btn"
+                  className="invite-accept-btn"
                   onClick={() => handleRespondInvite(invite._id, 'accept')}
                 >
                   Accept
                 </button>
                 <button
-                  className="team-create-btn invite-decline-btn"
+                  className="invite-decline-btn"
                   onClick={() => handleRespondInvite(invite._id, 'decline')}
                 >
                   Decline
@@ -233,19 +225,13 @@ const Home = () => {
 
         {teams.map(team => {
           const recentGames = (matchesByTeam[team._id] || []).slice(0, 3);
-          const teamNotificationCount = (matchesByTeam[team._id] || []).filter(
-            (match) => !viewedMatchIds.has(match._id)
-          ).length;
+          const teamNotificationCount = 0;
           return (
           <div key={team._id} className="team-card">
             <Link to={`/team/${team._id}`} className="team-card-header">
               <div className="team-card-header-title">
                 <h2>{team.name}</h2>
-                {teamNotificationCount > 0 && (
-                  <span className="notification-badge" aria-label={`${teamNotificationCount} unviewed matches`}>
-                    {teamNotificationCount}
-                  </span>
-                )}
+                {/* Removed unviewed match badge */}
               </div>
               <i className="fas fa-arrow-right"></i>
             </Link>
@@ -281,11 +267,7 @@ const Home = () => {
           >
             <div className="feed-title-group">
               <h2>Recent Games</h2>
-              {recentGamesNotificationCount > 0 && (
-                <span className="notification-badge" aria-label={`${recentGamesNotificationCount} unviewed recent games`}>
-                  {recentGamesNotificationCount}
-                </span>
-              )}
+              {/* Removed unviewed recent games badge */}
             </div>
             <i className={`fas ${openSections.recentGames ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
           </button>
@@ -304,7 +286,6 @@ const Home = () => {
                 >
                   <div>
                     <p className="feed-main">{game.teamName} vs {game.opponent}</p>
-                    <p className="feed-sub">Game recap</p>
                   </div>
                   <span className="feed-date">{formatDate(game.date)}</span>
                 </Link>
@@ -324,11 +305,7 @@ const Home = () => {
           >
             <div className="feed-title-group">
               <h2>Upcoming Matches</h2>
-              {upcomingMatchesNotificationCount > 0 && (
-                <span className="notification-badge" aria-label={`${upcomingMatchesNotificationCount} unopened upcoming matches`}>
-                  {upcomingMatchesNotificationCount}
-                </span>
-              )}
+              {/* Removed unopened upcoming matches badge */}
             </div>
             <i className={`fas ${openSections.upcomingMatches ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
           </button>
@@ -347,7 +324,6 @@ const Home = () => {
                 >
                   <div>
                     <p className="feed-main">{match.teamName} vs {match.opponent}</p>
-                    <p className="feed-sub">Upcoming match</p>
                   </div>
                   <span className="feed-date">{formatDate(match.date)}</span>
                 </Link>

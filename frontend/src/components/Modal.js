@@ -1,20 +1,47 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import './Modal.css';
+
+const CLOSE_ANIMATION_MS = 200;
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef(null);
   const [startY, setStartY] = useState(0);
   const [currentY, setCurrentY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isVisible, setIsVisible] = useState(isOpen);
+  const skipFirstRun = useRef(true);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (skipFirstRun.current) {
+      skipFirstRun.current = false;
+      return;
     }
+
+    if (isOpen) {
+      setIsVisible(true);
+      setIsClosing(false);
+    } else {
+      setIsClosing(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsClosing(false);
+      }, CLOSE_ANIMATION_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const scrollY = window.scrollY;
+    // Lock scroll on html (not body) — avoids collapsing body height which
+    // triggers iOS to recalculate env(safe-area-inset-bottom) and dvh,
+    // causing the persistent gap after the modal closes.
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
@@ -45,25 +72,30 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isVisible) return null;
 
-  return (
-    <div className="modal-backdrop" onClick={handleBackdropClick}>
+  return createPortal(
+    <div className={`modal-backdrop${isClosing ? ' closing' : ''}`} onClick={handleBackdropClick}>
       <div
         ref={modalRef}
-        className="modal-content"
-        style={{ transform: `translateY(${currentY}px)` }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        className={`modal-content${isClosing ? ' closing' : ''}`}
+        style={isClosing ? undefined : { transform: `translateY(${currentY}px)` }}
       >
-        <div className="modal-handle"></div>
+        <div
+          className="modal-handle-area"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className="modal-handle" />
+        </div>
         {title && <h2 className="modal-title">{title}</h2>}
         <div className="modal-body">
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

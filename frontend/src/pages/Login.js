@@ -213,7 +213,7 @@ useEffect(() => {
               <label htmlFor="username" className="form-label">
                 Username
                 {!isRegistering && !resetPasswordMode && (
-                  <span style={{ fontSize: "16px", color: "var(--color-text-muted)", marginLeft: "6px" }}>or Email</span>
+                  <span className="form-label-suffix">or Email</span>
                 )}
               </label>
               {!resetPasswordMode ? (
@@ -327,7 +327,7 @@ useEffect(() => {
               )}
 
               {resetPasswordMode && (
-                <div style={{ marginTop: 12 }}>
+                <div className="reset-password-fields">
                   <div className="form-group">
                     <label htmlFor="newPassword" className="form-label">New Password</label>
                     <input

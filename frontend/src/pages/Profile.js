@@ -474,8 +474,8 @@ const Profile = () => {
 
         {modalType !== 'photo' && (
           <div className="modal-actions">
-            <button className="pill-btn ghost" onClick={closeModal}>Cancel</button>
-            <button className="pill-btn" onClick={saveModal}>Save</button>
+            <button className="modal-btn modal-btn-cancel" onClick={closeModal}>Cancel</button>
+            <button className="modal-btn modal-btn-primary" onClick={saveModal}>Save</button>
           </div>
         )}
       </Modal>

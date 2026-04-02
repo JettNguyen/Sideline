@@ -5,8 +5,7 @@ import Dashboard from "@uppy/dashboard";
 import "@uppy/core/css/style.min.css";
 import "@uppy/dashboard/css/style.min.css";
 import "./VideoUploader.css";
-
-const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:5001/api").replace(/\/$/, "");
+import { API_BASE_URL } from "../utils/api";
 
 export default function VideoUploader({ onUploadSuccess, matchId }) {
   const containerRef = useRef(null);
@@ -90,21 +89,12 @@ export default function VideoUploader({ onUploadSuccess, matchId }) {
       console.error("Error details:", error);
     };
 
-    const completeHandler = (result) => {
-      if (!result.successful.length) {
-        setUploadStatus("No files were uploaded.");
-      }
-    };
-
     uppy.on("upload-success", successHandler);
     uppy.on("upload-error", errorHandler);
-    uppy.on("complete", completeHandler);
 
     return () => {
       uppy.off("upload-success", successHandler);
       uppy.off("upload-error", errorHandler);
-      uppy.off("complete", completeHandler);
-
       uppy.destroy();
     };
   }, [isDesktop, onUploadSuccess, matchId]);
@@ -151,8 +141,8 @@ export default function VideoUploader({ onUploadSuccess, matchId }) {
       {isDesktop ? (
         <div ref={containerRef} />
       ) : (
-        <div className="mobile-upload-actions">
-          <label className="mobile-file-label" htmlFor="mobile-video-file">
+        <div className="video-upload-actions">
+          <label className="video-file-label" htmlFor="mobile-video-file">
             Choose file
           </label>
           <input
@@ -160,18 +150,18 @@ export default function VideoUploader({ onUploadSuccess, matchId }) {
             type="file"
             accept=".mp4,.mov,video/mp4,video/quicktime"
             onChange={handleMobileFileSelect}
-            className="mobile-file-input"
+            className="video-file-input"
           />
-          <button className="mobile-upload-btn" onClick={handleMobileUpload}>
+          <button className="video-upload-btn" onClick={handleMobileUpload}>
             Upload from device
           </button>
           {selectedFileName && (
-            <p className="upload-meta">Selected: {selectedFileName}</p>
+            <p className="video-upload-meta">Selected: {selectedFileName}</p>
           )}
         </div>
       )}
 
-      {uploadStatus && <p className="upload-meta">{uploadStatus}</p>}
+      {uploadStatus && <p className="video-upload-meta">{uploadStatus}</p>}
     </div>
   );
 }

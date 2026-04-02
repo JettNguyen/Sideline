@@ -7,8 +7,7 @@ import "@uppy/core/css/style.min.css";
 import "@uppy/image-editor/css/style.min.css";
 import "@uppy/dashboard/css/style.min.css";
 import "./ImageUploader.css";
-
-const API_BASE_URL = (process.env.REACT_APP_API_URL || "http://localhost:5001/api").replace(/\/$/, "");
+import { API_BASE_URL } from "../utils/api";
 
 export default function ImageUploader({ onUploadSuccess }) {
   const containerRef = useRef(null);
@@ -145,17 +144,11 @@ export default function ImageUploader({ onUploadSuccess }) {
       <h2 className="image-uploader-title">Upload Profile Picture</h2>
 
       {previewUrl && (
-        <div className="preview-row">
+        <div className="image-preview-row">
           <img
             src={previewUrl}
             alt="Preview"
-            className="preview-image"
-            style={{
-              width: 150,
-              height: 150,
-              objectFit: "cover",
-              borderRadius: "50%",
-            }}
+            className="image-preview"
           />
           <button
             className="edit-square"
@@ -168,15 +161,15 @@ export default function ImageUploader({ onUploadSuccess }) {
         </div>
       )}
 
-      {selectedFileName && <p className="upload-meta">Selected: {selectedFileName}</p>}
-      {uploadStatus && <p className="upload-meta">{uploadStatus}</p>}
-      {!selectedFileName && <p className="upload-meta">No image selected</p>}
+      {selectedFileName && <p className="image-upload-meta">Selected: {selectedFileName}</p>}
+      {uploadStatus && <p className="image-upload-meta">{uploadStatus}</p>}
+      {!selectedFileName && <p className="image-upload-meta">No image selected</p>}
 
       {isDesktop ? (
         <div ref={containerRef} />
       ) : (
-        <div className="mobile-upload-actions">
-          <label className="mobile-file-label" htmlFor="image-file">
+        <div className="image-upload-actions">
+          <label className="image-file-label" htmlFor="image-file">
             Choose Photo
           </label>
           <input
@@ -184,11 +177,11 @@ export default function ImageUploader({ onUploadSuccess }) {
             type="file"
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             onChange={handleFileSelect}
-            className="mobile-file-input"
+            className="image-file-input"
           />
 
           {selectedFileName && (
-            <button className="mobile-upload-btn" onClick={handleUpload}>
+            <button className="image-upload-btn" onClick={handleUpload}>
               Upload
             </button>
           )}

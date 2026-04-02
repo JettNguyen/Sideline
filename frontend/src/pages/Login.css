@@ -3,7 +3,8 @@
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding: 10px;
+    min-height: 100dvh;
+    padding: max(env(safe-area-inset-top), 10px) 10px max(env(safe-area-inset-bottom), 10px);
     width: 100%;
 }
 
@@ -13,17 +14,6 @@
     align-items: center;
     margin-top: 10px;
     margin-bottom: 25px;
-}
-
-.welcome-text {
-    font-size: clamp(30px, 8vw, 40px);
-    color: var(--color-text);
-    margin: 10px 0 20px 0;
-    letter-spacing: 5px;
-    background-color: var(--color-surface);
-    padding: 0 15px 0 20px;
-    border-radius: 20px;
-    filter: drop-shadow(0px 0px 10px var(--color-shadow-white));
 }
 
 .login-logo {
@@ -39,6 +29,17 @@
     margin: 0;
     letter-spacing: 2px;
     filter: drop-shadow(0 0 5px var(--color-shadow-strong));
+}
+
+.welcome-text {
+    font-size: clamp(30px, 8vw, 40px);
+    color: var(--color-text);
+    margin: 10px 0 20px 0;
+    letter-spacing: 5px;
+    background-color: var(--color-surface);
+    padding: 0 15px 0 20px;
+    border-radius: 20px;
+    filter: drop-shadow(0px 0px 10px var(--color-shadow-white));
 }
 
 .login-card {
@@ -63,7 +64,7 @@
 }
 
 .form-label {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 400;
     color: var(--color-text);
     display: block;
@@ -71,6 +72,12 @@
     margin-left: 5px;
     letter-spacing: 1px;
     filter: drop-shadow(0 0 10px var(--color-shadow-strong));
+}
+
+.form-label-suffix {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-left: 6px;
 }
 
 .username-static {
@@ -84,13 +91,6 @@
     letter-spacing: 1px;
     line-height: 1.5;
     display: block;
-    align-items: center;
-}
-
-.info-text {
-    color: var(--color-text-muted);
-    font-size: 14px;
-    margin: 15px 5px;
 }
 
 .form-input {
@@ -144,10 +144,24 @@
     color: var(--color-accent-secondary);
 }
 
+.password-toggle:active {
+    transform: scale(0.9);
+}
+
+.reset-password-fields {
+    margin-top: 12px;
+}
+
+.info-text {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    margin: 15px 5px;
+}
+
 .login-button {
     width: 100%;
-    padding: 10px;
-    font-size: 20px;
+    padding: 15px;
+    font-size: 24px;
     font-weight: 400;
     color: var(--color-text);
     background: var(--color-accent);
@@ -179,15 +193,15 @@
 }
 
 .forgot-password-button {
-    margin-top: 10px;
+    margin-top: 20px;
     display: block;
     margin-left: auto;
     margin-right: auto;
     background: none;
     border: none;
     color: var(--color-text-muted);
-    font-size: 14px;
-    letter-spacing: 0.7px;
+    font-size: 16px;
+    letter-spacing: 1px;
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -199,13 +213,14 @@
 }
 
 .forgot-password-button:active {
-    transform: scale(0.98);
+    transform: scale(0.95);
 }
 
 .create-account-button {
     width: 80%;
-    padding: 5px 10px;
-    font-size: 14px;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 16px;
     font-weight: 400;
     white-space: pre-wrap;
     color: var(--color-text);
@@ -226,31 +241,23 @@
     transform: scale(0.95);
 }
 
-.success-text {
-  color: #1f9d55;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.error-text {
-    color: red;
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-}
-
 .action-primary {
     background: var(--color-accent);
     color: var(--color-text);
     border: none;
-    padding: 10px 15px;
+    padding: 13px 15px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     transition: background-color 0.2s, transform 0.2s;
 }
 
 .action-primary:hover {
     background: var(--color-accent-hover);
+}
+
+.action-primary:active {
+    transform: scale(0.95);
 }
 
 .action-primary:disabled {
@@ -262,11 +269,11 @@
     background: transparent;
     color: var(--color-text-muted);
     border: 2px solid var(--color-border);
-    padding: 10px 15px;
+    padding: 13px 15px;
     margin-left: 10px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     transition: color 0.2s, transform 0.2s;
 }
 
@@ -274,25 +281,41 @@
     color: var(--color-text);
 }
 
+.action-secondary:active {
+    transform: scale(0.95);
+}
+
+.success-text {
+    color: var(--color-success);
+    text-align: center;
+    margin-top: 10px;
+}
+
+.error-text {
+    color: var(--color-error);
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
 @media (min-width: 500px) {
     .login-card {
         padding: 25px 20px;
     }
-    
+
     .welcome-text {
         font-size: clamp(32px, 6vw, 48px);
     }
-    
+
     .form-label {
         font-size: 24px;
     }
-    
+
     .login-button {
         font-size: 28px;
     }
-    
+
     .password-toggle {
         font-size: 18px;
-        right: 12px;
+        right: 10px;
     }
 }

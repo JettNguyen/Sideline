@@ -9,15 +9,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if(!token) {
+    if (!token) {
       setLoading(false);
       return;
     }
 
     const fetchUser = async () => {
       try {
-        const res = await api.get('/users/me');
-        setUser(res.data);
+        const userRes = await api.get('/users/me');
+        setUser(userRes.data);
       } catch (err) {
         console.error('Error validating token:', err);
         localStorage.removeItem('token');
@@ -28,8 +28,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     fetchUser();
-
-
   }, []);
 
   const login = async ({ username, password }) => {
@@ -43,6 +41,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem('token', token);
       setUser(user);
+
 
       return { success: true };
     } catch (err) {
@@ -60,6 +59,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setUser(null);
   };
+
 
   const updateUser = (nextUser) => {
     setUser(nextUser);
