@@ -1,37 +1,49 @@
 # Sideline
 
 <p align="center">
-	<img src="frontend/src/logo.svg" alt="Sideline logo" width="140" />
+  <img src="frontend/src/logo.svg" alt="Sideline logo" width="140" />
 </p>
 
-Youth soccer club video management web application
+Sideline is a soccer video and team management app built for coaches and parents.
 
-## User quick start
+It helps teams organize matches, upload clips, tag key moments, manage membership requests, and share game context in one place.
 
-[Open Sideline](https://jettnguyen.github.io/Sideline/)
+## Open the app
 
-For mobile devices for best experience:
+Live web app: [Sideline](https://jettnguyen.github.io/Sideline/)
 
-**iOS:**
+## Install on mobile (recommended)
 
-- Go to the website on an iPhone
-- Press the ```Share``` icon
-- Select ```Add to Home Screen```
-- Ensure ```Open as Web App``` is toggled "On"
-- Add
+Sideline works best as an installed web app.
 
-**Android:**
+### iOS
 
-- Go to the website on an Andoid device
-- Click the three dots to open the browser menu
-- Select ```Add to home screen```
-- Press ```Install```
+1. Open Sideline in Safari
+2. Tap ```Share```
+3. Tap ```Add to Home Screen```
+4. Confirm ```Open as Web App``` is enabled
+5. Tap ```Add```
 
-## Developer quick start (backend + frontend)
+### Android
 
-### 1. Backend setup
+1. Open Sideline in Chrome
+2. Open the browser menu (three dots)
+3. Tap ```Add to home screen```
+4. Confirm installation
 
-Install and run the backend:
+## Features
+
+- Create and manage teams
+- Invite users or approve join requests
+- Assign team-specific roles
+- Add matches and upload clips
+- Tag important moments during playback
+- View clips by match, player, and profile
+- Use the app in PWA mode on mobile
+
+## Local development
+
+### 1. Backend
 
 ```bash
 cd backend
@@ -39,12 +51,18 @@ npm install
 npm run dev
 ```
 
-### 2. Frontend setup
-
-Install and run the frontend:
+### 2. Frontend
 
 ```bash
 cd frontend
 npm install
 npm start
 ```
+
+## Tech stack
+
+- React
+- Node.js + Express
+- MongoDB + Mongoose
+- AWS S3 (media storage)
+- Uppy (upload pipeline)

@@ -29,16 +29,20 @@
 .modal-content {
     background: var(--color-surface);
     width: 100%;
-    margin: 0 10px;
     max-width: 750px;
     max-height: calc(100dvh - 40px);
     border-radius: 20px 20px 0 0;
-    padding: 10px 25px 40px;
+    padding: 10px 25px calc(40px + env(safe-area-inset-bottom));
     animation: slideUp 0.2s ease;
     transition: transform 0.2s ease;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scrollbar-width: none;
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
 }
 
 .modal-content.closing {
@@ -90,7 +94,6 @@
     font-size: 16px;
     color: var(--color-text-muted);
     margin-bottom: 5px;
-    margin-left: 5px;
 }
 
 .modal-input {

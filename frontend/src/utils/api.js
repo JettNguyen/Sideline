@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-export const API_BASE_URL = (process.env.REACT_APP_API_URL || 'http://localhost:5001/api').replace(/\/$/, '');
+const rawApiBaseUrl = process.env.REACT_APP_API_URL;
+
+if (!rawApiBaseUrl) {
+  throw new Error('Missing REACT_APP_API_URL. Set it in your environment for this build.');
+}
+
+export const API_BASE_URL = rawApiBaseUrl.replace(/\/$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,

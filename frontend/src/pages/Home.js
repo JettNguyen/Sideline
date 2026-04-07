@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 import Modal from '../components/Modal';
 import { formatShortDate } from '../utils/date';
+import useDelayedLoadingIndicator from '../hooks/useDelayedLoadingIndicator';
 import './Home.css';
 
 const Home = () => {
@@ -18,6 +19,7 @@ const Home = () => {
   const [joinError, setJoinError] = useState('');
   const [showTeamActionModal, setShowTeamActionModal] = useState(false);
   const [teamActionTab, setTeamActionTab] = useState('create');
+  const showDashboardLoadingIndicator = useDelayedLoadingIndicator(loading, 1000);
 
   const [openSections, setOpenSections] = useState({
     recentGames: false,
@@ -79,8 +81,8 @@ const Home = () => {
     }
   }, [location.search]);
 
-  const recentGamesFeed = useMemo(() => {
-    const rows = teams.flatMap((team) => {
+  const allMatchesFeed = useMemo(() => {
+    return teams.flatMap((team) => {
       const matches = matchesByTeam[team._id] || [];
       return matches.map((match) => ({
         id: match._id,
@@ -90,18 +92,23 @@ const Home = () => {
         date: match.date,
       }));
     });
+  }, [matchesByTeam, teams]);
 
-    return rows
+  const recentGamesFeed = useMemo(() => {
+    const now = new Date();
+    return allMatchesFeed
+      .filter((match) => new Date(match.date) < now)
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 8);
-  }, [matchesByTeam, teams]);
+  }, [allMatchesFeed]);
 
   const upcomingMatchesFeed = useMemo(() => {
     const now = new Date();
-    return recentGamesFeed
+    return allMatchesFeed
       .filter((match) => new Date(match.date) >= now)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
       .slice(0, 8);
-  }, [recentGamesFeed]);
+  }, [allMatchesFeed]);
 
 
   const handleCreateTeam = async () => {
@@ -216,7 +223,7 @@ const Home = () => {
 
       {error && <p className="home-error-text">{error}</p>}
 
-      {loading && <p className="no-games">Loading dashboard...</p>}
+      {showDashboardLoadingIndicator && <p className="no-games">Loading dashboard...</p>}
       
       <div className="teams-list">
         {!loading && teams.length === 0 && (
@@ -305,7 +312,6 @@ const Home = () => {
           >
             <div className="feed-title-group">
               <h2>Upcoming Matches</h2>
-              {/* Removed unopened upcoming matches badge */}
             </div>
             <i className={`fas ${openSections.upcomingMatches ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
           </button>

@@ -133,11 +133,30 @@
     padding: 15px;
 }
 
+.video-controls-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.video-uploader {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-family: 'Saira', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .play-toggle-btn {
     border: none;
     border-radius: 10px;
     padding: 10px;
-    margin-bottom: 10px;
     background: var(--color-surface-3);
     color: var(--color-text);
     cursor: pointer;
@@ -312,6 +331,7 @@
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
     filter: drop-shadow(5px 5px 5px var(--color-shadow));
+    z-index: 2;
 }
 
 .clip-card:hover {
@@ -474,7 +494,6 @@
     z-index: 50;
 }
 
-/* Extend background below bottom: 0 to cover any sub-pixel gap at screen edge */
 .bottom-action-bar::after {
     content: '';
     position: absolute;
@@ -535,7 +554,7 @@
     background: var(--color-surface-3);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 450px) {
     .moment-log-item {
         flex-direction: column;
     }
@@ -569,4 +588,54 @@
     .clips-grid {
         grid-template-columns: repeat(4, 1fr);
     }
+}
+
+@media (hover: none) {
+    .clip-card:hover { transform: none; }
+    .my-clip-item:hover { transform: none; }
+    .tag-chip:not(.selected):hover { background: var(--color-surface-2) !important; }
+    .add-clip-btn:hover { background: var(--color-surface-2); color: var(--color-text-muted); }
+    .bar-btn:hover { background: var(--color-surface-2); }
+    .bar-btn.primary:hover { background: var(--color-accent); }
+    .clip-delete-btn:hover { background: var(--color-surface-2); color: var(--color-text-muted); }
+    .moment-log-item:hover { background: var(--color-surface-2); }
+    .moment-log-remove-btn:hover { background: var(--color-surface-3); color: var(--color-text-muted); }
+}
+
+.clip-card-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.clip-card-has-delete {
+    border-radius: 10px 10px 0 0 !important;
+    overflow: hidden;
+}
+
+.clip-delete-btn {
+    background: var(--color-surface-2);
+    border: none;
+    color: var(--color-text-muted);
+    padding: 10px;
+    z-index: 1;
+    border-radius: 0 0 10px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 14px;
+    width: 100%;
+    transition: background-color 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    filter: drop-shadow(0 4px 4px var(--color-shadow));
+}
+
+.clip-delete-btn:hover {
+    background: var(--color-error);
+    color: var(--color-text);
+}
+
+.clip-delete-btn:active {
+    opacity: 0.8;
 }

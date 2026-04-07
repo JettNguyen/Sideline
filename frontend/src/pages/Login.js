@@ -72,7 +72,6 @@ useEffect(() => {
     e.preventDefault();
     setError('');
     setMessage('');
-    setShowResendVerification(false);
     setIsSubmitting(true);
 
     try {
@@ -89,6 +88,10 @@ useEffect(() => {
         );
         setIsRegistering(false);
         setPassword('');
+      } else if (showResendVerification) {
+        await api.post('/auth/resend-verification', { email, username });
+        setMessage('Verification email sent. Please check your inbox.');
+        setShowResendVerification(false);
       }else {
         // login mode
         const result = await login({ username, password });
@@ -97,6 +100,9 @@ useEffect(() => {
         }else {
           setError(result.message || 'Login failed.');
           if (result.requiresEmailVerification) {
+            if (username.includes('@') && !email) {
+              setEmail(username);
+            }
             setShowResendVerification(true);
           }
         }
@@ -108,6 +114,9 @@ useEffect(() => {
       setMessage('');
 
       if (err.response?.data?.requiresEmailVerification) {
+        if (username.includes('@') && !email) {
+          setEmail(username);
+        }
         setShowResendVerification(true);
       }
     } finally {
@@ -183,21 +192,6 @@ useEffect(() => {
     }
   };
 
-  const handleResendVerification = async () => {
-    setError('');
-    setMessage('');
-
-    try {
-      await api.post('/auth/resend-verification', { email, username });
-      setMessage('Verification email sent. Please check your inbox.');
-      setShowResendVerification(false);
-    } catch (err) {
-      console.error('Resend verification failed:', err);
-      setError(err.response?.data?.message || 'Could not resend verification email.');
-    }
-  };
-
-
   return (
     <div className="login-container">
       <div className="login-header">
@@ -211,7 +205,7 @@ useEffect(() => {
           {(!showForgotPassword || resetPasswordMode) && (
             <div className="form-group">
               <label htmlFor="username" className="form-label">
-                Username
+                {showResendVerification ? 'Username (optional)' : 'Username'}
                 {!isRegistering && !resetPasswordMode && (
                   <span className="form-label-suffix">or Email</span>
                 )}
@@ -223,7 +217,8 @@ useEffect(() => {
                   className="form-input"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  required
+                  required={!showResendVerification}
+                  autoComplete="username"
                   disabled={isSubmitting}
                 />
               ) : (
@@ -234,21 +229,24 @@ useEffect(() => {
           
           {(isRegistering || showResendVerification || showForgotPassword) && (
             <div className="form-group">
-              <label htmlFor="email" className="form-label">Email</label>
+              <label htmlFor="email" className="form-label">
+                {showResendVerification ? 'Email (optional)' : 'Email'}
+              </label>
               <input
                 type="email"
                 id="email"
                 className="form-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required={isRegistering}
-                placeholder={showResendVerification && !isRegistering ? 'Enter your email to resend verification' : ''}
+                required={isRegistering || showForgotPassword}
+                placeholder={showResendVerification && !isRegistering ? 'Email (optional)' : ''}
+                autoComplete="email"
                 disabled={isSubmitting}
               />
             </div>
           )}
           
-          {!resetPasswordMode && !showForgotPassword && (
+          {!resetPasswordMode && !showForgotPassword && !showResendVerification && (
             <div className="form-group">
               <label htmlFor="password" className="form-label">Password</label>
               <div className="password-input-container">
@@ -259,6 +257,7 @@ useEffect(() => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete={isRegistering ? 'new-password' : 'current-password'}
                   disabled={isSubmitting}
                 />
                 <button
@@ -278,7 +277,9 @@ useEffect(() => {
           
           {!resetPasswordMode && !showForgotPassword && (
             <button type="submit" className="login-button" disabled={isSubmitting}>
-              {isSubmitting ? (isRegistering ? 'Creating account…' : 'Logging in…') : (isRegistering ? 'Create Account' : 'Log In')}
+              {isSubmitting
+                ? (isRegistering ? 'Creating account…' : (showResendVerification ? 'Sending…' : 'Logging in…'))
+                : (isRegistering ? 'Create Account' : (showResendVerification ? 'Send Email' : 'Log In'))}
             </button>
           )}
 
@@ -288,9 +289,13 @@ useEffect(() => {
                 <button
                   type="button"
                   className="forgot-password-button"
-                  onClick={handleForgotPassword}
+                  onClick={showResendVerification ? () => {
+                    setShowResendVerification(false);
+                    setError('');
+                    setMessage('');
+                  } : handleForgotPassword}
                 >
-                  Forgot your password?
+                  {showResendVerification ? 'Back to login' : 'Forgot your password?'}
                 </button>
               )}
 
@@ -315,17 +320,6 @@ useEffect(() => {
                 </div>
               )}
 
-              {showResendVerification && !resetPasswordMode && (
-                <button
-                  type="button"
-                  className="forgot-password-button"
-                  onClick={handleResendVerification}
-                  disabled={!email}
-                >
-                  Resend verification email
-                </button>
-              )}
-
               {resetPasswordMode && (
                 <div className="reset-password-fields">
                   <div className="form-group">
@@ -336,6 +330,7 @@ useEffect(() => {
                       className="form-input"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
+                      autoComplete="new-password"
                     />
                   </div>
                   <div className="form-group">
@@ -346,6 +341,7 @@ useEffect(() => {
                       className="form-input"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      autoComplete="new-password"
                     />
                   </div>
                   <button

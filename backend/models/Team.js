@@ -11,6 +11,8 @@ const teamSchema = new mongoose.Schema(
       index: true,
     },
     isArchived: { type: Boolean, default: false },
+    location: { type: String, default: '', trim: true },
+    isPublic: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

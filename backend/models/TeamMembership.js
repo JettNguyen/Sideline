@@ -22,7 +22,7 @@ const teamMembershipSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'invited', 'removed'],
+      enum: ['active', 'invited', 'removed', 'requested'],
       default: 'active',
       required: true,
     },

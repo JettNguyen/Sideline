@@ -15,6 +15,7 @@
   --color-surface: #111111;
   --color-surface-2: #191919;
   --color-surface-3: #262626;
+  --color-surface-4: rgba(11, 11, 11, 0.75);
   --color-divider: #444444;
 
   --color-border: #767676;
@@ -30,6 +31,10 @@
   --color-shadow: rgba(0, 0, 0, 0.5);
   --color-shadow-strong: rgba(0, 0, 0, 0.9);
   --color-shadow-white: rgba(255, 255, 255, 0.2);
+
+  --page-transition-distance: 15px;
+  --page-transition-duration: 0.3s;
+  --page-transition-ease: cubic-bezier(0.20, 0.60, 0.35, 1);
 }
 
 * {
@@ -39,10 +44,17 @@
   font-family: 'Jersey 10', sans-serif;
 }
 
+html {
+  /* Prevent iOS from inflating font sizes in landscape */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 button, a, [role="button"], label[for] {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
+
 
 /* more readable font for these styles */
 input, textarea, select,
@@ -90,8 +102,6 @@ p {
   color: var(--color-text);
 }
 
-/* iOS Safari ignores background-attachment: fixed on non-body elements and
-   causes scroll repaint jank. Only apply it on hover-capable (desktop) devices. */
 @media (hover: hover) {
   .App {
     background-attachment: fixed;
@@ -100,7 +110,7 @@ p {
 
 .container {
   width: 100%;
-  padding: 0 20px calc(72px + env(safe-area-inset-bottom));
+  padding: 0 24px calc(72px + env(safe-area-inset-bottom));
   margin: 0 auto;
 }
 
@@ -228,8 +238,42 @@ p {
   transform: translateY(-50%) scale(0.95);
 }
 
-.header-profile-btn {
+.header-right {
+  position: absolute;
+  top: 50%;
   right: 15px;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.header-search-btn {
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, transform 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.header-search-btn:hover {
+  color: var(--color-accent-secondary-hover);
+}
+
+.header-search-btn:active {
+  transform: scale(0.95);
+}
+
+/* profile btn lives inside .header-right flex container — override the shared absolute rules */
+.header-right .header-profile-btn {
+  position: static;
+  top: unset;
+  transform: none;
 }
 
 .header-profile-btn:hover {
@@ -238,6 +282,10 @@ p {
 
 .header-profile-btn:active {
   transform: translateY(-50%) scale(0.95);
+}
+
+.header-right .header-profile-btn:active {
+  transform: scale(0.95);
 }
 
 @media (hover: none) {
@@ -258,23 +306,27 @@ p {
 .page-transition {
   opacity: 1;
   position: relative;
-  top: 0;
-  transition: opacity 0.25s ease, top 0.25s ease;
+  transform: translateY(0);
+  overflow: visible;
+  transition:
+    opacity var(--page-transition-duration) var(--page-transition-ease),
+    transform var(--page-transition-duration) var(--page-transition-ease);
+  will-change: opacity, transform;
 }
 
 .page-transition.page-entering {
   opacity: 0;
-  top: 25px;
+  transform: translateY(var(--page-transition-distance));
 }
 
 .page-transition.page-exiting {
   opacity: 0;
-  top: -25px;
+  transform: translateY(calc(var(--page-transition-distance) * -1));
 }
 
 .page-transition.page-entered {
   opacity: 1;
-  top: 0;
+  transform: translateY(0);
 }
 
 select,
