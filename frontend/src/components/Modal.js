@@ -6,11 +6,10 @@ const CLOSE_ANIMATION_MS = 200;
 
 const Modal = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef(null);
-  const [startY, setStartY] = useState(0);
   const [currentY, setCurrentY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isVisible, setIsVisible] = useState(isOpen);
+  const dragStateRef = useRef({ active: false, startY: 0, pointerId: null, offsetY: 0 });
   const skipFirstRun = useRef(true);
 
   useEffect(() => {
@@ -35,9 +34,6 @@ const Modal = ({ isOpen, onClose, title, children }) => {
   useEffect(() => {
     if (!isOpen) return;
     const scrollY = window.scrollY;
-    // Lock scroll on html (not body) — avoids collapsing body height which
-    // triggers iOS to recalculate env(safe-area-inset-bottom) and dvh,
-    // causing the persistent gap after the modal closes.
     document.documentElement.style.overflow = 'hidden';
     return () => {
       document.documentElement.style.overflow = '';
@@ -45,22 +41,34 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     };
   }, [isOpen]);
 
-  const handleTouchStart = (e) => {
-    setStartY(e.touches[0].clientY);
-    setIsDragging(true);
+  const handlePointerDown = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragStateRef.current = {
+      active: true,
+      startY: e.clientY,
+      pointerId: e.pointerId,
+      offsetY: 0,
+    };
+    setCurrentY(0);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
 
-  const handleTouchMove = (e) => {
-    if (!isDragging) return;
-    const diff = e.touches[0].clientY - startY;
-    if (diff > 0) {
-      setCurrentY(diff);
-    }
+  const handlePointerMove = (e) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.active || dragState.pointerId !== e.pointerId) return;
+    const diff = e.clientY - dragState.startY;
+    const offsetY = diff > 0 ? diff : 0;
+    dragStateRef.current.offsetY = offsetY;
+    setCurrentY(offsetY);
   };
 
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    if (currentY > 50) {
+  const handlePointerEnd = (e) => {
+    const dragState = dragStateRef.current;
+    if (!dragState.active || dragState.pointerId !== e.pointerId) return;
+    const draggedDistance = dragState.offsetY;
+    dragStateRef.current = { active: false, startY: 0, pointerId: null, offsetY: 0 };
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+    if (draggedDistance > 70) {
       onClose();
     }
     setCurrentY(0);
@@ -83,9 +91,10 @@ const Modal = ({ isOpen, onClose, title, children }) => {
       >
         <div
           className="modal-handle-area"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerEnd}
+          onPointerCancel={handlePointerEnd}
         >
           <div className="modal-handle" />
         </div>

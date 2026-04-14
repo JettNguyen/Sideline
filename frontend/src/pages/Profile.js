@@ -4,6 +4,8 @@ import Modal from '../components/Modal';
 import { AuthContext } from '../context/AuthContext';
 import useAuth from '../hooks/useAuth';
 import api from '../utils/api';
+import { formatLongDate } from '../utils/date';
+import useDelayedLoadingIndicator from '../hooks/useDelayedLoadingIndicator';
 import './Profile.css';
 import ImageUploader from '../components/ImageUploader';
 
@@ -16,6 +18,7 @@ const Profile = () => {
   const [email, setEmail] = useState('');
   const [photoStatus, setPhotoStatus] = useState('Update your picture');
   const [passwordStatus, setPasswordStatus] = useState('Send a reset link');
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [teams, setTeams] = useState([]);
   const [kids, setKids] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -26,6 +29,27 @@ const Profile = () => {
   const [payload, setPayload] = useState(null);
   const [childTeamId, setChildTeamId] = useState('');
   const [profilePicUrl, setProfilePicUrl] = useState("");
+  const [loadingProfilePic, setLoadingProfilePic] = useState(false);
+  const [myClips, setMyClips] = useState([]);
+  const [loadingMyClips, setLoadingMyClips] = useState(false);
+  const [myClipsOpen, setMyClipsOpen] = useState(false);
+  const [myClipThumbUrls, setMyClipThumbUrls] = useState({});
+  const showProfileDataLoadingIndicator = useDelayedLoadingIndicator(loadingData, 1000);
+  const showMyClipsLoadingIndicator = useDelayedLoadingIndicator(loadingMyClips, 1000);
+  const showProfilePicLoadingIndicator = useDelayedLoadingIndicator(loadingProfilePic, 1000);
+
+  const loadMyClips = async () => {
+    if (myClips.length > 0) return;
+    setLoadingMyClips(true);
+    try {
+      const res = await api.get('/videos/me');
+      setMyClips(res.data || []);
+    } catch (err) {
+      console.error('Load my clips error:', err);
+    } finally {
+      setLoadingMyClips(false);
+    }
+  };
 
   const loadProfileLists = async () => {
     setLoadingData(true);
@@ -82,18 +106,60 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfilePic = async () => {
+      setLoadingProfilePic(true);
       try {
         const res = await api.get('/images/me');
         setProfilePicUrl(res.data.url);
       } catch (err) {
         console.error("Failed to load profile pic", err);
+        setProfilePicUrl('');
+      } finally {
+        setLoadingProfilePic(false);
       }
     };
 
     if (user?.profilePicture) {
       fetchProfilePic();
+    } else {
+      setLoadingProfilePic(false);
+      setProfilePicUrl('');
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!myClipsOpen || !myClips.length) return;
+
+    let cancelled = false;
+
+    const fetchThumbs = async () => {
+      const clipsWithout = myClips.filter((c) => !myClipThumbUrls[c._id]);
+      if (!clipsWithout.length) return;
+
+      const entries = await Promise.all(
+        clipsWithout.map(async (clip) => {
+          try {
+            const res = await api.get(`/videos/${clip._id}/play`);
+            return [clip._id, res.data.url];
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      if (cancelled) return;
+
+      setMyClipThumbUrls((prev) => {
+        const next = { ...prev };
+        entries.forEach((entry) => {
+          if (entry) next[entry[0]] = entry[1];
+        });
+        return next;
+      });
+    };
+
+    fetchThumbs();
+    return () => { cancelled = true; };
+  }, [myClipsOpen, myClips]);
 
   const openModal = (type, data = {}) => {
     setModalType(type);
@@ -188,9 +254,28 @@ const Profile = () => {
       case 'photo':
         setPhotoStatus('Photo updated');
         break;
-      case 'reset':
-        setPasswordStatus('Reset link sent');
+      case 'reset': {
+        const resetEmail = email.trim().toLowerCase();
+
+        if (!resetEmail) {
+          setProfileError('Email is required.');
+          return;
+        }
+
+        try {
+          setIsSendingPasswordReset(true);
+          const res = await api.post('/auth/request-password-reset', { email: resetEmail });
+
+          setPasswordStatus(res.data?.message || 'Password reset email sent');
+        } catch (err) {
+          console.error('Send password reset email error:', err.response?.data || err);
+          setProfileError(err.response?.data?.message || 'Could not send password reset email.');
+          return;
+        } finally {
+          setIsSendingPasswordReset(false);
+        }
         break;
+      }
       case 'team': {
         if (payload?.index == null) break;
         const team = teams[payload.index];
@@ -288,6 +373,12 @@ const Profile = () => {
   const editTeam = (index) => openModal('team', { index });
   const editKid = (index) => openModal('kid', { index });
   const addChildOrTeam = () => openModal('add');
+
+  const toggleMyClips = () => {
+    const nextOpen = !myClipsOpen;
+    setMyClipsOpen(nextOpen);
+    if (nextOpen) loadMyClips();
+  };
 
   const handleSignOut = () => {
     logout();
@@ -474,8 +565,14 @@ const Profile = () => {
 
         {modalType !== 'photo' && (
           <div className="modal-actions">
-            <button className="modal-btn modal-btn-cancel" onClick={closeModal}>Cancel</button>
-            <button className="modal-btn modal-btn-primary" onClick={saveModal}>Save</button>
+            <button className="modal-btn modal-btn-cancel" onClick={closeModal} disabled={isSendingPasswordReset}>
+              Cancel
+            </button>
+            <button className="modal-btn modal-btn-primary" onClick={saveModal} disabled={isSendingPasswordReset}>
+              {modalType === 'reset'
+                ? (isSendingPasswordReset ? 'Sending...' : 'Yes')
+                : 'Save'}
+            </button>
           </div>
         )}
       </Modal>
@@ -493,7 +590,7 @@ const Profile = () => {
 
         <div className="card">
           {profileError && <p className="profile-error-text">{profileError}</p>}
-          {loadingData && <p className="value">Loading account details...</p>}
+          {showProfileDataLoadingIndicator && <p className="value">Loading account details...</p>}
 
           <div className="row">
             <div>
@@ -512,7 +609,7 @@ const Profile = () => {
                     alt="Profile"
                     className="profile-avatar"
                   />
-                ) : user?.profilePicture ? (
+                ) : user?.profilePicture && showProfilePicLoadingIndicator ? (
                   <p className="value">Loading profile photo...</p>
                 ) : (
                   <p className="value">{photoStatus}</p>
@@ -575,6 +672,57 @@ const Profile = () => {
 
           <button className="full-btn" onClick={addChildOrTeam}>Add child / team</button>
         </div>
+      </section>
+
+      <section className="profile-section">
+        <button className="section-toggle" onClick={toggleMyClips} aria-expanded={myClipsOpen}>
+          <h2>My Clips</h2>
+          <i className={`fas fa-chevron-${myClipsOpen ? 'up' : 'down'}`}></i>
+        </button>
+
+        {myClipsOpen && (
+          <div className="card">
+            {showMyClipsLoadingIndicator && <p className="value">Loading clips...</p>}
+            {!loadingMyClips && myClips.length === 0 && (
+              <p className="value">No clips uploaded yet.</p>
+            )}
+            {!loadingMyClips && myClips.length > 0 && (
+              <div className="my-clips-grid">
+                {myClips.map((clip) => (
+                  <button
+                    key={clip._id}
+                    className="my-clip-item"
+                    onClick={() =>
+                      navigate(
+                        `/team/${clip.match?.team?._id}/game/${clip.match?._id}?clipId=${clip._id}`
+                      )
+                    }
+                  >
+                    <div className="my-clip-thumb">
+                      {myClipThumbUrls[clip._id] ? (
+                        <video
+                          className="my-clip-preview"
+                          src={`${myClipThumbUrls[clip._id]}#t=0.001`}
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <i className="fas fa-play"></i>
+                      )}
+                    </div>
+                    <div className="my-clip-info">
+                      <p className="my-clip-match">
+                        {clip.match?.team?.name} vs {clip.match?.opponent}
+                      </p>
+                      <p className="my-clip-date">{formatLongDate(clip.match?.date)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       <button className="signout-btn" onClick={handleSignOut}>Sign out</button>

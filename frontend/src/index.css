@@ -6,3 +6,39 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+html,
+body,
+#root {
+  touch-action: manipulation;
+}
+
+/* Keep hover/active interactions smooth across interactive UI elements. */
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [role='button'],
+  [class*='btn'],
+  [class*='card'],
+  [class*='chip'],
+  [class*='tab'],
+  [class*='toggle'],
+  [class*='item']
+) {
+  transition-property: background-color, color, border-color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+@media (max-width: 900px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+}

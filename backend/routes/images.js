@@ -71,6 +71,26 @@ router.post(
   }
 );
 
+router.get('/user/:userId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('profilePicture');
+    if (!user || !user.profilePicture) {
+      return res.status(404).json({ message: 'No profile picture' });
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: user.profilePicture,
+    });
+
+    const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    res.json({ url: signedUrl });
+  } catch (err) {
+    console.error('Get user profile picture error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 router.get('/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

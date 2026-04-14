@@ -49,6 +49,51 @@
     display: none;
 }
 
+.video-upload-preview {
+    width: 100%;
+    padding-top: 55%;
+    position: relative;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.video-upload-thumbnail {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: black;
+}
+
+.video-upload-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.video-upload-thumbnail-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-muted);
+    font-size: 24px;
+    background: black;
+}
+
+.video-upload-preview-el {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .video-upload-meta {
     margin: 5px 0 0;
     font-size: 12px;

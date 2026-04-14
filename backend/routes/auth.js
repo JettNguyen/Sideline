@@ -22,6 +22,12 @@ const buildTokenUrl = (token, param) => {
     return `${clientBase}/#/login?${param}=${token}`;
 };
 
+const isValidPassword = (password) => {
+    if (typeof password !== 'string') return false;
+
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+};
+
 
 
 //POST /api/auth/register
@@ -34,6 +40,12 @@ router.post('/register', async (req, res) => {
 
         if(!username || !email || !password) {
             return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        if (!isValidPassword(password)) {
+            return res.status(400).json({
+                message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.',
+            });
         }
 
         const escapedUsername = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -199,6 +211,12 @@ router.post('/reset-password', async (req, res) => {
         const { token, password } = req.body || {};
         if (!token || !password) {
             return res.status(400).json({ message: 'Token and new password are required' });
+        }
+
+        if (!isValidPassword(password)) {
+            return res.status(400).json({
+                message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.',
+            });
         }
 
         const tokenHash = hashToken(token);

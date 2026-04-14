@@ -13,13 +13,28 @@
       "type": "image/png"
     },
     {
+      "src": "maskable-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "logo512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
+  "scope": ".",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
   "theme_color": "#0b150b",
   "background_color": "#0b150b"
 }

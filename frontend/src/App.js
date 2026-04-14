@@ -5,6 +5,7 @@ import './App.css';
 import logo from './logo.svg';
 
 import ProtectedRoute from './components/ProtectedRoute';
+import SearchOverlay from './components/SearchOverlay';
 
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -20,6 +21,7 @@ function AppContent() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [profilePicUrl, setProfilePicUrl] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [displayLocation, setDisplayLocation] = useState(location);
   const [transitionStage, setTransitionStage] = useState('entered');
 
@@ -45,16 +47,15 @@ function AppContent() {
   useEffect(() => {
     if (location.pathname === displayLocation.pathname) return;
 
-    // Launch exit transition first
     setTransitionStage('exiting');
     const exitTimer = setTimeout(() => {
       setDisplayLocation(location);
       setTransitionStage('entering');
       const enterTimer = setTimeout(() => {
         setTransitionStage('entered');
-      }, 150);
+      }, 300);
       return () => clearTimeout(enterTimer);
-    }, 200);
+    }, 275);
 
     return () => clearTimeout(exitTimer);
   }, [location, displayLocation]);
@@ -79,21 +80,28 @@ function AppContent() {
               </Link>
             </div>
             {showProfileButton && user && (
-              <Link to="/profile" className="header-profile-btn" aria-label="Profile">
-                {user?.profilePicture && profilePicUrl ? (
-                  <img
-                    src={profilePicUrl}
-                    alt="Profile"
-                    className="header-profile-pic"
-                  />
-                ) : (
-                  <i className="fas fa-user"></i>
-                )}
-              </Link>
+              <div className="header-right">
+                <button
+                  className="header-search-btn"
+                  onClick={() => setSearchOpen(true)}
+                  aria-label="Search teams"
+                >
+                  <i className="fas fa-search" />
+                </button>
+                <Link to="/profile" className="header-profile-btn" aria-label="Profile">
+                  {user?.profilePicture && profilePicUrl ? (
+                    <img src={profilePicUrl} alt="Profile" className="header-profile-pic" />
+                  ) : (
+                    <i className="fas fa-user" />
+                  )}
+                </Link>
+              </div>
             )}
           </div>
         </header>
       )}
+
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <div className={`container page-transition page-${transitionStage}`}>
         <Routes location={displayLocation}>
