@@ -15,12 +15,18 @@ const router = express.Router();
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const TEAM_ASSIGNABLE_ROLES = ['coach', 'parent', 'player'];
+const INVITE_APPROVER_ROLES = ['owner', 'coach'];
 
 const normalizeRole = (role) => {
   if (!role || typeof role !== 'string') return null;
   const normalized = role.trim().toLowerCase();
   return TEAM_ASSIGNABLE_ROLES.includes(normalized) ? normalized : null;
 };
+
+const isTrustedInvite = (membership) =>
+  !!membership &&
+  membership.status === 'invited' &&
+  INVITE_APPROVER_ROLES.includes(membership.invitedByRole);
 
 async function getActiveMembership(teamId, userId) {
   return TeamMembership.findOne({
@@ -119,10 +125,19 @@ router.post('/join', auth, async (req, res) => {
       return res.status(409).json({ message: 'Join request already pending' });
     }
 
-    if (existingMembership?.status === 'invited') {
+    if (isTrustedInvite(existingMembership)) {
       existingMembership.status = 'active';
       await existingMembership.save();
       return res.json({ message: 'Joined team successfully', team });
+    }
+
+    if (existingMembership?.status === 'invited') {
+      existingMembership.status = 'requested';
+      existingMembership.role = 'player';
+      await existingMembership.save();
+      return res.status(201).json({
+        message: 'Join request sent. A coach or owner must approve before you can join.',
+      });
     }
 
     if (existingMembership) {
@@ -196,6 +211,8 @@ router.post('/:teamId/invites', auth, async (req, res) => {
     if (existingMembership) {
       existingMembership.status = 'invited';
       existingMembership.role = roleToAssign;
+      existingMembership.invitedBy = req.user.id;
+      existingMembership.invitedByRole = inviterMembership.role;
       await existingMembership.save();
       return res.status(201).json({ message: 'Invite sent' });
     }
@@ -205,6 +222,8 @@ router.post('/:teamId/invites', auth, async (req, res) => {
       user: invitee._id,
       role: roleToAssign,
       status: 'invited',
+      invitedBy: req.user.id,
+      invitedByRole: inviterMembership.role,
     });
 
     return res.status(201).json({ message: 'Invite sent' });

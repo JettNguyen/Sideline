@@ -5,6 +5,7 @@ const auth = require('../middleware/authMiddleware');
 const TeamMembership = require('../models/TeamMembership');
 
 const router = express.Router();
+const INVITE_APPROVER_ROLES = ['owner', 'coach'];
 
 router.get('/', auth, async (req, res) => {
   try {
@@ -53,8 +54,24 @@ router.post('/:inviteId/respond', auth, async (req, res) => {
       return res.status(404).json({ message: 'Invite not found' });
     }
 
-    invite.status = action === 'accept' ? 'active' : 'removed';
+    if (action === 'accept') {
+      if (INVITE_APPROVER_ROLES.includes(invite.invitedByRole)) {
+        invite.status = 'active';
+      } else {
+        invite.status = 'requested';
+        invite.role = 'player';
+      }
+    } else {
+      invite.status = 'removed';
+    }
+
     await invite.save();
+
+    if (action === 'accept' && invite.status === 'requested') {
+      return res.json({
+        message: 'Join request sent. A coach or owner must approve before you can join.',
+      });
+    }
 
     return res.json({ message: action === 'accept' ? 'Invite accepted' : 'Invite declined' });
   } catch (err) {

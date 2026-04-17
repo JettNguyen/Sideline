@@ -26,6 +26,16 @@ const teamMembershipSchema = new mongoose.Schema(
       default: 'active',
       required: true,
     },
+    invitedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    invitedByRole: {
+      type: String,
+      enum: ['owner', 'coach', 'parent', 'player', null],
+      default: null,
+    },
   },
   { timestamps: true }
 );
