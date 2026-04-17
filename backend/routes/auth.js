@@ -8,16 +8,48 @@ const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/emai
 const router = express.Router();
 
 const VERIFICATION_TOKEN_HOURS = 24;
+const DEFAULT_CLIENT_APP_URL = 'https://jettnguyen.github.io/Sideline';
 
 const makeToken = () => crypto.randomBytes(32).toString('hex');
 const hashToken = (token) =>
     crypto.createHash('sha256').update(token).digest('hex');
 
-const buildTokenUrl = (token, param) => {
-    const clientBase =
-        process.env.CLIENT_APP_URL ||
-        process.env.CLIENT_ORIGIN?.split(',')[0]?.trim() ||
-        'http://localhost:3000';
+const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, '');
+
+const getClientBaseUrl = (req) => {
+    const requestOrigin = normalizeOrigin(req.get('origin'));
+    const refererOrigin = (() => {
+        try {
+            return normalizeOrigin(new URL(req.get('referer')).origin);
+        } catch {
+            return null;
+        }
+    })();
+
+    const configuredOrigins = [
+        process.env.CLIENT_APP_URL,
+        ...(process.env.CLIENT_ORIGIN || '').split(','),
+        DEFAULT_CLIENT_APP_URL,
+        'http://localhost:3000',
+    ]
+        .map(normalizeOrigin)
+        .filter(Boolean);
+
+    if (requestOrigin && configuredOrigins.includes(requestOrigin)) {
+        return requestOrigin;
+    }
+
+    if (refererOrigin && configuredOrigins.includes(refererOrigin)) {
+        return refererOrigin;
+    }
+
+    return normalizeOrigin(process.env.CLIENT_APP_URL)
+        || normalizeOrigin((process.env.CLIENT_ORIGIN || '').split(',')[0])
+        || DEFAULT_CLIENT_APP_URL;
+};
+
+const buildTokenUrl = (req, token, param) => {
+    const clientBase = getClientBaseUrl(req);
 
     return `${clientBase}/#/login?${param}=${token}`;
 };
@@ -74,7 +106,7 @@ router.post('/register', async (req, res) => {
             emailVerificationExpires: expires,
         });
 
-        const verificationUrl = buildTokenUrl(rawToken, 'verifyToken');
+        const verificationUrl = buildTokenUrl(req, rawToken, 'verifyToken');
 
         await sendVerificationEmail({
             to: user.email,
@@ -157,7 +189,7 @@ router.post('/resend-verification', async (req, res) => {
         user.emailVerificationExpires = expires;
         await user.save();
 
-        const verificationUrl = buildTokenUrl(rawToken, 'verifyToken');
+        const verificationUrl = buildTokenUrl(req, rawToken, 'verifyToken');
 
         await sendVerificationEmail({
             to: user.email,
@@ -194,7 +226,7 @@ router.post('/request-password-reset', async (req, res) => {
         user.passwordResetExpires = expires;
         await user.save();
 
-        const resetUrl = buildTokenUrl(rawToken, 'resetToken');
+        const resetUrl = buildTokenUrl(req, rawToken, 'resetToken');
 
         await sendPasswordResetEmail({ to: user.email, username: user.username, resetUrl });
 
