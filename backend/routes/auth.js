@@ -14,37 +14,53 @@ const makeToken = () => crypto.randomBytes(32).toString('hex');
 const hashToken = (token) =>
     crypto.createHash('sha256').update(token).digest('hex');
 
-const normalizeOrigin = (value) => value?.trim().replace(/\/+$/, '');
+const normalizeUrl = (value) => value?.trim().replace(/\/+$/, '');
+
+const toOrigin = (value) => {
+    const normalized = normalizeUrl(value);
+
+    if (!normalized) {
+        return null;
+    }
+
+    try {
+        return new URL(normalized).origin;
+    } catch {
+        return normalized;
+    }
+};
 
 const getClientBaseUrl = (req) => {
-    const requestOrigin = normalizeOrigin(req.get('origin'));
+    const requestOrigin = toOrigin(req.get('origin'));
     const refererOrigin = (() => {
         try {
-            return normalizeOrigin(new URL(req.get('referer')).origin);
+            return new URL(req.get('referer')).origin;
         } catch {
             return null;
         }
     })();
 
-    const configuredOrigins = [
+    const configuredAppUrls = [
         process.env.CLIENT_APP_URL,
         ...(process.env.CLIENT_ORIGIN || '').split(','),
         DEFAULT_CLIENT_APP_URL,
         'http://localhost:3000',
     ]
-        .map(normalizeOrigin)
+        .map(normalizeUrl)
         .filter(Boolean);
 
-    if (requestOrigin && configuredOrigins.includes(requestOrigin)) {
-        return requestOrigin;
+    const matchingRequestUrl = configuredAppUrls.find((appUrl) => toOrigin(appUrl) === requestOrigin);
+    if (matchingRequestUrl) {
+        return matchingRequestUrl;
     }
 
-    if (refererOrigin && configuredOrigins.includes(refererOrigin)) {
-        return refererOrigin;
+    const matchingRefererUrl = configuredAppUrls.find((appUrl) => toOrigin(appUrl) === refererOrigin);
+    if (matchingRefererUrl) {
+        return matchingRefererUrl;
     }
 
-    return normalizeOrigin(process.env.CLIENT_APP_URL)
-        || normalizeOrigin((process.env.CLIENT_ORIGIN || '').split(',')[0])
+    return normalizeUrl(process.env.CLIENT_APP_URL)
+        || normalizeUrl((process.env.CLIENT_ORIGIN || '').split(',')[0])
         || DEFAULT_CLIENT_APP_URL;
 };
 

@@ -15,11 +15,27 @@ const app = express();
 const clientOriginEnv = process.env.CLIENT_ORIGIN || '';
 const clientAppUrlEnv = process.env.CLIENT_APP_URL || '';
 
+const normalizeUrl = (value) => value?.trim().replace(/\/+$/, '');
+
+const toOrigin = (value) => {
+    const normalized = normalizeUrl(value);
+
+    if (!normalized) {
+        return null;
+    }
+
+    try {
+        return new URL(normalized).origin;
+    } catch {
+        return normalized;
+    }
+};
+
 const allowedOrigins = Array.from(
     new Set(
         `${clientOriginEnv},${clientAppUrlEnv}`
             .split(',')
-            .map((origin) => origin.trim().replace(/\/+$/, ''))
+            .map(toOrigin)
             .filter(Boolean)
     )
 );
@@ -31,7 +47,7 @@ if (allowedOrigins.length === 0) {
 const corsOptions = allowedOrigins.length
     ? {
         origin(origin, callback) {
-            const normalized = origin ? origin.replace(/\/+$/, '') : origin;
+            const normalized = toOrigin(origin);
             if (!origin || allowedOrigins.includes(normalized)) {
                 return callback(null, true);
             }
