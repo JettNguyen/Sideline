@@ -457,7 +457,7 @@ const Team = () => {
 
   // ─── Derived UI helpers ───────────────────────────────────────────────────
   const inviteCode = team?.inviteCode || '';
-  const inviteLink = inviteCode ? `${CLIENT_APP_URL}/?invite=${inviteCode}` : '';
+  const inviteLink = inviteCode ? `${CLIENT_APP_URL}/#/?invite=${inviteCode}` : '';
   const qrImageUrl = inviteLink
     ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(inviteLink)}`
     : '';
